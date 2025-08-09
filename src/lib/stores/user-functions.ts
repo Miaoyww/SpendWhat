@@ -4,9 +4,7 @@ import { showAlert } from "./alert-dialog-store";
 
 const API_URL = "http://localhost:3000/api/user/";
 
-export const userInfo = writable({
-  isLoggedIn: false,
-});
+export let isLoggedIn = false;
 
 export function login(userName: string, password: string): Promise<boolean> {
   const data = {
@@ -17,7 +15,7 @@ export function login(userName: string, password: string): Promise<boolean> {
   return axios
     .post(API_URL + "login", data)
     .then((response) => {
-      userInfo.update((state) => ({ ...state, isLoggedIn: true }));
+      isLoggedIn = true;
       let session = response.data.cookie.session;
       // 将session存储到cookie
       document.cookie = `session=${session}; path=/`;
@@ -38,7 +36,7 @@ export function register(userName: string, password: string): Promise<boolean> {
   return axios
     .post(API_URL + "register", data)
     .then((response) => {
-      userInfo.update((state) => ({ ...state, isLoggedIn: true }));
+      isLoggedIn = true;
       return true;
     })
     .catch((error) => {
@@ -55,6 +53,6 @@ export function register(userName: string, password: string): Promise<boolean> {
 export function logout() {
   // 清除cookie后返回true
   document.cookie = "session=; path=/";
-  userInfo.update((state) => ({ ...state, isLoggedIn: false }));
+  isLoggedIn = false;
   return true;
 }

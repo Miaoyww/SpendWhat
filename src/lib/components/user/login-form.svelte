@@ -4,7 +4,7 @@
   import { Input } from "$lib/components/ui/input/index.js";
   import * as Card from "$lib/components/ui/card/index.js";
   import { Label } from "$lib/components/ui/label/index.js";
-  import { login, userInfo } from "$lib/stores/user-functions";
+  import { login } from "$lib/stores/user-functions";
   import { showAlert } from "$lib/stores/alert-dialog-store";
   import { goto } from "$app/navigation";
 
@@ -29,8 +29,8 @@
       showAlert("错误", "用户名长度不能小于3个字符");
       return;
     }
-    await login($state.snapshot(userName), $state.snapshot(password));
-    if (userInfo.subscribe((state) => state.isLoggedIn)) {
+    let isLoggedIn = await login($state.snapshot(userName), $state.snapshot(password));
+    if (isLoggedIn) {
       // 登录成功，跳转到首页
       goto("/user");
     }

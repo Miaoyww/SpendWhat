@@ -1,5 +1,11 @@
 <script>
-  import { SettingsIcon, UserIcon, Search, SquarePlus  } from "lucide-svelte";
+  import {
+    SettingsIcon,
+    UserIcon,
+    Search,
+    SquarePlus,
+    Coins,
+  } from "lucide-svelte";
 
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
   import { Separator } from "$lib/components/ui/separator/index.js";
@@ -8,9 +14,20 @@
 </script>
 
 <Sidebar.Root>
+  <Sidebar.Header>
+    <Sidebar.Menu>
+      <Sidebar.MenuItem>
+        <Sidebar.MenuButton class="data-[slot=sidebar-menu-button]:!p-1.5">
+          <a href="/" class="flex items-center gap-2 ml-3">
+            <Coins size={18} />
+            <span class="text-lg font-semibold">SpendWhat</span>
+          </a>
+        </Sidebar.MenuButton>
+      </Sidebar.MenuItem>
+    </Sidebar.Menu>
+  </Sidebar.Header>
   <Sidebar.Content>
     <Sidebar.Group>
-      <Sidebar.GroupLabel>SpendWhat</Sidebar.GroupLabel>
       <Sidebar.GroupContent>
         <Sidebar.Menu>
           <Sidebar.MenuItem>
@@ -18,23 +35,21 @@
               <Button
                 class="flex items-center sm:flex outline outline-offset-2"
                 variant="ghost"
-                size="sm"
                 onclick={() => {
                   goto("/");
                 }}
               >
                 <SquarePlus />
-                <span>添加新账单</span>
+                <span class="m-1 text-base">新账单</span>
               </Button>
             </Sidebar.MenuButton>
             <Sidebar.MenuButton>
               <Button
                 class="flex items-center sm:flex outline outline-offset-2"
                 variant="ghost"
-                size="sm"
               >
                 <Search />
-                <span>搜索账单</span>
+                <span class="m-1 text-base">搜索账单</span>
               </Button>
             </Sidebar.MenuButton>
           </Sidebar.MenuItem>

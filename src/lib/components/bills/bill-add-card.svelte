@@ -4,11 +4,23 @@
   import { Label } from "$lib/components/ui/label/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
   import { Plus } from "lucide-svelte";
+  import { showAlert } from "$lib/stores/alert-dialog-store";
+  import { isLoggedIn } from "$lib/stores/user-functions";
+  import { goto } from "$app/navigation";
 
   let title = $state("");
 
   function addBill() {
-    
+    if (!isLoggedIn) {
+      goto("/user/login");
+      showAlert("错误", "请先登录.");
+      return;
+    }
+
+    if (title.length < 3) {
+      showAlert("错误", "标题长度至少为3个字符.");
+      return;
+    }
   }
 </script>
 
