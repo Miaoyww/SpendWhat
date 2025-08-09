@@ -1,25 +1,10 @@
-<script lang="ts">
-  import {
-    HouseIcon,
-    InboxIcon,
-    SettingsIcon,
-    UserIcon,
-  } from "lucide-svelte";
-  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+<script>
+  import { SettingsIcon, UserIcon, Search, SquarePlus  } from "lucide-svelte";
 
-  // Menu items.
-  const items = [
-    {
-      title: "Home",
-      url: "/",
-      icon: HouseIcon,
-    },
-    {
-      title: "Bills",
-      url: "/bills",
-      icon: InboxIcon,
-    },
-  ];
+  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+  import { Separator } from "$lib/components/ui/separator/index.js";
+  import { Button } from "$lib/components/ui/button/index.js";
+  import { goto } from "$app/navigation";
 </script>
 
 <Sidebar.Root>
@@ -28,18 +13,32 @@
       <Sidebar.GroupLabel>SpendWhat</Sidebar.GroupLabel>
       <Sidebar.GroupContent>
         <Sidebar.Menu>
-          {#each items as item (item.title)}
-            <Sidebar.MenuItem>
-              <Sidebar.MenuButton>
-                {#snippet child({ props })}
-                  <a href={item.url} {...props}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </a>
-                {/snippet}
-              </Sidebar.MenuButton>
-            </Sidebar.MenuItem>
-          {/each}
+          <Sidebar.MenuItem>
+            <Sidebar.MenuButton>
+              <Button
+                class="flex items-center sm:flex outline outline-offset-2"
+                variant="ghost"
+                size="sm"
+                onclick={() => {
+                  goto("/");
+                }}
+              >
+                <SquarePlus />
+                <span>添加新账单</span>
+              </Button>
+            </Sidebar.MenuButton>
+            <Sidebar.MenuButton>
+              <Button
+                class="flex items-center sm:flex outline outline-offset-2"
+                variant="ghost"
+                size="sm"
+              >
+                <Search />
+                <span>搜索账单</span>
+              </Button>
+            </Sidebar.MenuButton>
+          </Sidebar.MenuItem>
+          <Separator />
         </Sidebar.Menu>
       </Sidebar.GroupContent>
     </Sidebar.Group>
@@ -49,9 +48,12 @@
       <Sidebar.MenuItem>
         <div style="float: left;">
           <Sidebar.MenuButton>
-            <a href="/user">
-              <UserIcon />
-            </a>
+            <div style="display: flex; align-items: center;">
+              <a href="/user" class="flex items-center">
+                <UserIcon />
+                <span class="ml-1">用户</span>
+              </a>
+            </div>
           </Sidebar.MenuButton>
         </div>
         <div style="float: right;">

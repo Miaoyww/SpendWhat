@@ -14,6 +14,9 @@ importers:
       lucide-svelte:
         specifier: ^0.539.0
         version: 0.539.0(svelte@5.38.0)
+      svelte-spa-router:
+        specifier: ^4.0.1
+        version: 4.0.1
     devDependencies:
       '@internationalized/date':
         specifier: ^3.8.1
@@ -812,6 +815,10 @@ packages:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
 
+  regexparam@2.0.2:
+    resolution: {integrity: sha512-A1PeDEYMrkLrfyOwv2jwihXbo9qxdGD3atBYQA9JJgreAx8/7rC6IUkWOw2NQlOxLp2wL0ifQbh1HuidDfYA6w==}
+    engines: {node: '>=8'}
+
   rollup@4.46.2:
     resolution: {integrity: sha512-WMmLFI+Boh6xbop+OAGo9cQ3OgX9MIg7xOQjn+pTCwOkk+FNDAeAemXkJ3HzDJrVXleLOFVa1ipuc1AmEx1Dwg==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
@@ -847,6 +854,9 @@ packages:
     peerDependencies:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
+
+  svelte-spa-router@4.0.1:
+    resolution: {integrity: sha512-2JkmUQ2f9jRluijL58LtdQBIpynSbem2eBGp4zXdi7aDY1znbR6yjw0KsonD0aq2QLwf4Yx4tBJQjxIjgjXHKg==}
 
   svelte-toolbelt@0.9.3:
     resolution: {integrity: sha512-HCSWxCtVmv+c6g1ACb8LTwHVbDqLKJvHpo6J8TaqwUme2hj9ATJCpjCPNISR1OCq2Q4U1KT41if9ON0isINQZw==}
@@ -1545,6 +1555,8 @@ snapshots:
 
   readdirp@4.1.2: {}
 
+  regexparam@2.0.2: {}
+
   rollup@4.46.2:
     dependencies:
       '@types/estree': 1.0.8
@@ -1605,6 +1617,10 @@ snapshots:
       typescript: 5.9.2
     transitivePeerDependencies:
       - picomatch
+
+  svelte-spa-router@4.0.1:
+    dependencies:
+      regexparam: 2.0.2
 
   svelte-toolbelt@0.9.3(svelte@5.38.0):
     dependencies:
