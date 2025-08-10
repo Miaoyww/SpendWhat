@@ -8,11 +8,13 @@ import {
   getBillsByUserId,
   deleteUserLocal,
 } from "$lib/stores/data-store";
-import { billStore } from "./bill-store";
+import { billStore, getCurrentUserBillsFromServer } from "./bill-store";
 
 const API_URL = "http://localhost:3000/api/user/";
 
 export const currentUser = writable<User | null>(null);
+export let currentSession = "";
+
 let user: User | null = null;
 
 currentUser.subscribe((value) => {
@@ -40,8 +42,10 @@ export async function getCurrentUser(): Promise<User> {
   await saveUserLocal(user);
   console.log("获取当前用户信息:", user);
   if (user && user.id) {
-    let bills = await getBillsByUserId(user.id);
-    console.log("获取用户账单信息:", bills);
+    let bills = await getCurrentUserBillsFromServer();
+    if (!bills) {
+      bills = await getBillsByUserId(user.id);
+    }
     billStore.clear();
     billStore.addBillList(bills);
   }
@@ -53,6 +57,7 @@ export function loginByCookie(session: string): Promise<User | null> {
     return Promise.resolve(null);
   }
   console.log("尝试通过cookie登录，session:", session);
+  currentSession = session;
   return getCurrentUser();
 }
 

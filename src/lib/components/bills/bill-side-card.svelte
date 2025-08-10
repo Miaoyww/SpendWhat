@@ -14,11 +14,11 @@
   } from "$lib/components/ui/dialog/index.js";
   import { currentUser } from "$lib/stores/user-store";
   import { User } from "$lib/models/user";
-  import { billStore } from "$lib/stores/bill-store";
+  import { billStore, currentBill } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill/bill";
   import { NavigateTo } from "$lib/stores/navigating";
   import { Input } from "$lib/components/ui/input/index.js";
-  import { HOST_URL } from "$lib/request/api";
+  import { HOST_URL } from "$lib/utils/request";
 
   const props = $props<{ billItem: Bill }>();
   const { billItem } = props;
@@ -27,14 +27,10 @@
   let isRenaming = $state(false);
   let isSharing = $state(false);
 
+  let title: string = $state(billItem.title);
+
   currentUser.subscribe((value) => {
     user = value;
-  });
-
-  let bills: Bill[] = $state([]);
-
-  billStore.subscribe((value) => {
-    bills = value;
   });
 </script>
 
@@ -43,7 +39,14 @@
     <DialogHeader>
       <DialogTitle>重命名账单</DialogTitle>
       <DialogDescription>请输入新的账单名称</DialogDescription>
-      <Input bind:value={billItem.title} />
+      <Input
+        bind:value={title}
+        oninput={(e) => {
+          billItem.title = (e.target as HTMLInputElement).value;
+          currentBill.set(billItem);
+          console.log("Updated bill title:", billItem.title);
+        }}
+      />
     </DialogHeader>
     <DialogFooter>
       <Button
@@ -81,17 +84,20 @@
   </DialogContent>
 </Dialog>
 <Sidebar.MenuButton
-  class="flex justify-between items-center flex-1 text-left group/item h-10 mt-2 rounded-xl "
+  class="flex justify-between items-center flex-1 text-left group/item h-10 mt-2 rounded-xl cursor-pointer"
 >
   <Button
-    class="outline outline-offset-2"
+    class="outline outline-offset-2 p-0"
     onclick={() => {
       NavigateTo(`/bill/detail?id=${billItem.id}`);
-      billStore.currentBill.set(billItem);
+      currentBill.set(billItem);
     }}
     variant="ghost"
   >
-    <span class="-ml-3 text-base">{billItem.title}</span>
+    <span
+      class="ml-1 text-[14px] text-left line-clamp-1 max-w-[12rem] text-pretty"
+      >{title}</span
+    >
   </Button>
 
   <DropdownMenu.Root>

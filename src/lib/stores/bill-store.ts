@@ -1,12 +1,26 @@
 // stores/billStore.ts
 import { writable } from "svelte/store";
-import { Bill } from "$lib/models/bill/bill";
+import {
+  Bill,
+  type BillResponseItem,
+  mapResponseToBills,
+} from "$lib/models/bill/bill";
 import { BillItem } from "$lib/models/bill/bill-item";
 import { deleteBillLocal, saveBillLocal } from "$lib/stores/data-store";
+import { currentUser } from "$lib/stores/user-store";
+import api from "$lib/utils/request";
+import type { User } from "$lib/models/user";
+import { showAlert } from "./alert-dialog-store";
+import { NavigateTo } from "$lib/stores/navigating";
 
 // 定义 billStore 来存储所有账单
 const billsStore = writable<Bill[]>([]);
-const currentBill = writable<Bill | undefined>();
+export const currentBill = writable<Bill | undefined>();
+
+let _currentBill: Bill | undefined;
+currentBill.subscribe((value) => {
+  _currentBill = value;
+});
 
 // 获取单个账单
 function getBillById(id: string): Bill | undefined {
@@ -28,7 +42,22 @@ function addBillList(newBill: Bill[]) {
 
 // 删除账单
 function removeBill(id: string) {
-  billsStore.update((bills) => bills.filter((bill) => bill.id !== id));
+  let data = {
+    id_list: [id],
+  };
+  api.post("/bill/multi/delete", data).then((response) => {
+    if (response.status !== 200) {
+      showAlert("错误", `账单未能正确删除. ${response.status}`);
+    }
+  });
+  billsStore.update((bills) => {
+    return bills.filter((bill) => bill.id !== id);
+  });
+  if (_currentBill?.id === id) {
+    currentBill.set(undefined);
+    NavigateTo("/");
+  }
+  console.log("删除账单:", id);
   deleteBillLocal(id);
 }
 
@@ -48,7 +77,9 @@ function updateBill(updatedBill: Bill) {
     if (index !== -1) {
       bills[index] = updatedBill;
     }
+
     saveBillLocal(updatedBill);
+    updateBillToServer(updatedBill);
     return [...bills];
   });
 }
@@ -71,13 +102,13 @@ function removeBillItem(billId: string, itemId: string) {
     if (bill) {
       bill.items = bill.items.filter((item) => item.id !== itemId);
     }
+
     return [...bills];
   });
 }
 
 export const billStore = {
   subscribe: billsStore.subscribe,
-  currentBill,
   getBillById,
   addBill,
   addBillList,
@@ -87,3 +118,40 @@ export const billStore = {
   removeBillItem,
   clear,
 };
+
+export function getCurrentUserBillsFromServer(): Bill[] {
+  let data = {
+    skip: 0,
+    limit: 30,
+  };
+
+  api.post("/bill/list", data).then((response) => {
+    let billsRaw = response.data as BillResponseItem[];
+    let user: User | null = null;
+    currentUser.subscribe((value) => {
+      user = value;
+    });
+    if (user) {
+      const bills = mapResponseToBills(billsRaw, user);
+      billsStore.set(bills);
+      return bills.sort(
+        (a, b) =>
+          new Date(b.created_time).getTime() -
+          new Date(a.created_time).getTime()
+      );
+    }
+  });
+  return [];
+}
+
+export function updateBillToServer(bill: Bill) {
+  let data = {
+    id: bill.id,
+    title: bill.title,
+  };
+  api.post(`/bill/update`, data).then((response) => {
+    if (response.status !== 200) {
+      showAlert("错误", `账单未能正确更新. ${response.status}`);
+    }
+  });
+}

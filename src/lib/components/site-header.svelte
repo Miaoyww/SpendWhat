@@ -4,19 +4,20 @@
   import { Plus, Settings, SquareArrowOutUpRight } from "lucide-svelte";
   import SidebarTrigger from "$lib/components/ui/sidebar/sidebar-trigger.svelte";
   import { NavigateTo, isBillPage } from "$lib/stores/navigating";
-  import { billStore } from "$lib/stores/bill-store";
+  import { currentBill } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill/bill";
-
-  let currentBill: Bill | undefined = $state();
   let isBillNow: boolean = $state(false);
+
+  let _currentBill: Bill | null = $state(null);
+
+  currentBill.subscribe((bill) => {
+    if (bill) {
+      _currentBill = bill;
+    }
+  });
 
   isBillPage.subscribe((value) => {
     isBillNow = value;
-  });
-  billStore.currentBill.subscribe((bill) => {
-    if (bill) {
-      currentBill = bill;
-    }
   });
 </script>
 
@@ -32,7 +33,7 @@
     <h1 class="text-base font-medium">
       {#if isBillNow}
         {#if currentBill}
-          {currentBill.title}
+          {$currentBill?.title}
         {/if}
       {:else}
         SpendWhat
@@ -43,30 +44,29 @@
       <div class="grid grid-cols-3 gap-4">
         <div class="...">
           {#if isBillNow}
-          <Button
-            variant="ghost"
-            size="sm"
-            class="sm:flex outline outline-offset-2"
-            onclick={() => {
-              console.log(currentBill);
-              if(currentBill){
-                NavigateTo(`/bill/settings?id=${currentBill.id}`);
-              }
-            }}
-          >
-            <Settings />
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              class="sm:flex outline outline-offset-2"
+              onclick={() => {
+                if (currentBill) {
+                  NavigateTo(`/bill/settings?id=${_currentBill?.id}`);
+                }
+              }}
+            >
+              <Settings />
+            </Button>
           {/if}
         </div>
         <div class="...">
           {#if isBillNow}
-          <Button
-            variant="ghost"
-            size="sm"
-            class="sm:flex outline outline-offset-2"
-          >
-            <SquareArrowOutUpRight />
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              class="sm:flex outline outline-offset-2"
+            >
+              <SquareArrowOutUpRight />
+            </Button>
           {/if}
         </div>
         <div class="...">

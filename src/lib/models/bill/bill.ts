@@ -1,6 +1,6 @@
 import { BillItem } from "$lib/models/bill/bill-item";
 import { User } from "$lib/models/user";
-import api from "$lib/request/api";
+import api from "$lib/utils/request";
 import { showAlert } from "$lib/stores/alert-dialog-store";
 import axios from "axios";
 
@@ -29,37 +29,15 @@ export class Bill {
     this.item_updated_time = new Date(item_updated_time);
   }
 
-  //上传到服务器
-  // async uploadToServer() {
-  //   try {
-  //     let data = {
-  //       title: this.title,
-  //       owner: this.owner,
-  //       members: this.members,
-  //       items: this.items,
-  //       created_time: this.created_time,
-  //       item_updated_time: this.item_updated_time
-  //     }
-  //     const response = await api.post("/api/bills", data);
-  //     this._id = response.data._id;
-  //   } catch (error) {
-  //     showAlert("错误", "上传账单失败.");
-  //     console.error("上传账单失败:", error);
-  //   }
-  // }
-  //本地测试用uploadToServer()
   async uploadToServer() {
     try {
       let data = {
         title: this.title,
-        owner: this.owner,
-        members: this.members,
-        items: this.items,
-        created_time: this.created_time,
-        item_updated_time: this.item_updated_time
-      }
-      //随机生成uuid
-      this.id = crypto.randomUUID();
+      };
+
+      const response = await api.post("/bill/create", data);
+      console.log("上传账单成功:", response.data);
+      this.id = response.data.bill_id;
     } catch (error) {
       showAlert("错误", "上传账单失败.");
       console.error("上传账单失败:", error);
@@ -92,7 +70,7 @@ export class Bill {
   }
 
   // 添加新成员
-  addNewMember(user: User){
+  addNewMember(user: User) {
     this.members.push(user);
   }
 
@@ -100,4 +78,36 @@ export class Bill {
   private updateItemTime() {
     this.item_updated_time = new Date();
   }
+}
+
+export interface BillResponseItem {
+  _id: string;
+  title: string;
+  members: any[]; // 后端原始数据中是空数组，假设这里是 User 的简化数据
+  created_time: string;
+  item_updated_time: string;
+}
+
+export function mapResponseToBills(
+  responseData: BillResponseItem[],
+  currentUser: User
+): Bill[] {
+  return responseData.map((item) => {
+    // 这里假设成员为空或者可以进一步处理 members 数据
+    const members: User[] = item.members.map((m) => new User(m.name)); // 你需要根据实际成员数据结构改
+
+    // items 默认为空数组，因为后端没给
+    const items: BillItem[] = [];
+
+    const bill = new Bill(
+      item.title,
+      currentUser, // 假设当前用户为 owner，或者后端有owner字段时用它
+      members,
+      items,
+      item.created_time,
+      item.item_updated_time
+    );
+    bill.id = item._id; // 赋值数据库id
+    return bill;
+  });
 }

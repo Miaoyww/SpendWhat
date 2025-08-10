@@ -38,7 +38,7 @@
     );
     await newBill.uploadToServer();
     user.addNewOwnBill(newBill);
-
+    
     await saveUserLocal(user);
     await saveBillLocal(newBill);
     console.log("新账单已添加:", newBill);

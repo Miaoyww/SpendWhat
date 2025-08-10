@@ -11,23 +11,10 @@
   import { Separator } from "$lib/components/ui/separator/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { currentUser } from "$lib/stores/user-store";
-  import { User } from "$lib/models/user";
   import { billStore } from "$lib/stores/bill-store";
-  import type { Bill } from "$lib/models/bill/bill";
   import BillSideCard from "$lib/components/bills/bill-side-card.svelte";
   import { NavigateTo } from "$lib/stores/navigating";
 
-  let user: User | null = $state(null);
-
-  currentUser.subscribe((value) => {
-    user = value;
-  });
-
-  let bills: Bill[] = $state([]);
-
-  billStore.subscribe((value) => {
-    bills = value;
-  });
 </script>
 
 <Sidebar.Root>
@@ -80,14 +67,10 @@
             <span class="ml-3 mb-2 font-medium text-base text-gray-600"
               >账单</span
             >
-            {#if user}
-              {#if bills}
-                <ul>
-                  {#each bills as item}
-                    <BillSideCard billItem={item} />
-                  {/each}
-                </ul>
-              {/if}
+            {#if $currentUser}
+              {#each $billStore as item (item.id)}
+                <BillSideCard billItem={item} />
+              {/each}
             {/if}
           </Sidebar.MenuItem>
         </Sidebar.Menu>
@@ -103,8 +86,8 @@
             <div style="display: flex; align-items: center;">
               <a href="/user" class="flex items-center">
                 <UserIcon />
-                {#if user}
-                  <span class="ml-1">{user.username}</span>
+                {#if $currentUser}
+                  <span class="ml-1">{$currentUser.username}</span>
                 {:else}
                   <span class="ml-1">请登录</span>
                 {/if}
