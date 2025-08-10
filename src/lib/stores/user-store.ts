@@ -9,6 +9,7 @@ import {
   deleteUserLocal,
 } from "$lib/stores/data-store";
 import { billStore, getCurrentUserBillsFromServer } from "./bill-store";
+import api from "$lib/utils/request";
 
 const API_URL = "http://localhost:3000/api/user/";
 
@@ -35,28 +36,35 @@ currentUser.subscribe((value) => {
 //     });
 // }
 
-export async function getCurrentUser(): Promise<User> {
-  //let user = new User("Miaoyww");
-  let user = new User("Miaoyww");
-  currentUser.set(user);
-  await saveUserLocal(user);
-  console.log("获取当前用户信息:", user);
-  if (user && user.id) {
-    let bills = await getCurrentUserBillsFromServer();
-    if (!bills) {
-      bills = await getBillsByUserId(user.id);
-    }
-    billStore.clear();
-    billStore.addBillList(bills);
-  }
-  return user;
+export async function getCurrentUser(): Promise<User | null> {
+  return api
+    .post("/user/self/get")
+    .then(async (response) => {
+      user = new User(response.data.id, response.data.username);
+      currentUser.set(user);
+      await saveUserLocal(user);
+      console.log("获取当前用户信息:", user);
+      if (user && user.id) {
+        let bills = await getCurrentUserBillsFromServer();
+        if (!bills) {
+          bills = await getBillsByUserId(user.id);
+        }
+        billStore.clear();
+        billStore.addBillList(bills);
+      }
+      return user;
+    })
+    .catch((error) => {
+      showAlert("错误", `获取当前用户信息时出错: ${error}`);
+      return null;
+    });
 }
 
 export function loginByCookie(session: string): Promise<User | null> {
   if (!session) {
     return Promise.resolve(null);
   }
-  console.log("尝试通过cookie登录，session:", session);
+  console.log("尝试通过cookie登录");
   currentSession = session;
   return getCurrentUser();
 }

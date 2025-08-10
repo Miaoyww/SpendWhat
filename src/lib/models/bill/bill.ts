@@ -94,7 +94,7 @@ export function mapResponseToBills(
 ): Bill[] {
   return responseData.map((item) => {
     // 这里假设成员为空或者可以进一步处理 members 数据
-    const members: User[] = item.members.map((m) => new User(m.name)); // 你需要根据实际成员数据结构改
+    const members: User[] = []; // 你需要根据实际成员数据结构改
 
     // items 默认为空数组，因为后端没给
     const items: BillItem[] = [];
