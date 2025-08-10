@@ -5,27 +5,28 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
   import {
-    AlertDialog,
-    AlertDialogContent,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogAction,
-  } from "$lib/components/ui/alert-dialog";
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+  } from "$lib/components/ui/dialog/index.js";
   import { currentUser } from "$lib/stores/user-store";
   import { User } from "$lib/models/user";
   import { billStore } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill/bill";
   import { NavigateTo } from "$lib/stores/navigating";
   import { Input } from "$lib/components/ui/input/index.js";
+  import { HOST_URL } from "$lib/request/api";
 
   const props = $props<{ billItem: Bill }>();
   const { billItem } = props;
 
   let user: User | null = $state(null);
   let isRenaming = $state(false);
-  let menuIsOpen = $state(false);
+  let isSharing = $state(false);
+
   currentUser.subscribe((value) => {
     user = value;
   });
@@ -35,28 +36,50 @@
   billStore.subscribe((value) => {
     bills = value;
   });
-
 </script>
 
-<AlertDialog bind:open={isRenaming}>
-  <AlertDialogContent>
-    <AlertDialogHeader>
-      <AlertDialogTitle>重命名账单</AlertDialogTitle>
-      <AlertDialogDescription>请输入新的账单名称</AlertDialogDescription>
+<Dialog bind:open={isRenaming}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>重命名账单</DialogTitle>
+      <DialogDescription>请输入新的账单名称</DialogDescription>
       <Input bind:value={billItem.title} />
-    </AlertDialogHeader>
-    <AlertDialogFooter>
-      <AlertDialogAction
+    </DialogHeader>
+    <DialogFooter>
+      <Button
         onclick={() => {
           isRenaming = false;
           billStore.updateBill(billItem);
-        }}>
+        }}
+        type="submit"
+      >
         确定
-        </AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
 
+<Dialog bind:open={isSharing}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>分享</DialogTitle>
+      <DialogDescription>分享您的账单给其他人</DialogDescription>
+      <span>
+        {HOST_URL}/share?id={billItem.id}
+      </span>
+    </DialogHeader>
+    <DialogFooter>
+      <Button
+        onclick={() => {
+          isSharing = false;
+        }}
+        type="submit"
+      >
+        确定
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
 <Sidebar.MenuButton
   class="flex justify-between items-center flex-1 text-left group/item h-10 mt-2 rounded-xl "
 >
@@ -71,7 +94,7 @@
     <span class="-ml-3 text-base">{billItem.title}</span>
   </Button>
 
-  <DropdownMenu.Root bind:open={menuIsOpen}>
+  <DropdownMenu.Root>
     <DropdownMenu.Trigger
       class="group/edit invisible group-hover/item:visible ghost bg-transparent px-2 py-1 text-sm rounded"
     >
@@ -79,7 +102,11 @@
     </DropdownMenu.Trigger>
     <DropdownMenu.Content class="w-56">
       <DropdownMenu.Group>
-        <DropdownMenu.Item>
+        <DropdownMenu.Item
+          onclick={() => {
+            isSharing = true;
+          }}
+        >
           <div class="flex justify-between items-center">
             <Share size={28} strokeWidth={2} class="mr-2" />
             <span class="text-base">分享</span>
