@@ -37,7 +37,6 @@
       new Date().toISOString()
     );
     await newBill.uploadToServer();
-    user.addNewOwnBill(newBill);
     
     await saveUserLocal(user);
     await saveBillLocal(newBill);
