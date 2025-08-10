@@ -1,0 +1,115 @@
+import axios from "axios";
+import { writable } from "svelte/store";
+import { showAlert } from "./alert-dialog-store";
+import { User } from "$lib/models/user";
+import { Bill } from "$lib/models/bill/bill";
+import { saveUserLocal } from "./data-store";
+
+const API_URL = "http://localhost:3000/api/user/";
+
+export const currentUser = writable<User | null>(null);
+export const userBills = writable<Bill[]>([]);
+export let user: User | null = null;
+
+currentUser.subscribe((value) => {
+  if (value) {
+    user = value;
+  } else {
+    user = null;
+  }
+});
+
+// export function getCurrentUser(): Promise<User | null> {
+
+//   return axios
+//     .get(API_URL + "self/get")
+//     .then((response) => {
+//       currentUser.set(response.data.user);
+//       //TODO: 获取当前用户信息
+//       return response.data.user;
+//     })
+//     .catch((error) => {
+//       console.error("获取当前用户信息时出错:", error);
+//       return null;
+//     });
+// }
+
+export async function getCurrentUser(): Promise<User> {
+  //let user = new User("Miaoyww");
+  let user = new User("Miaoyww");
+  currentUser.set(user);
+  await saveUserLocal(user);
+  return user;
+}
+
+export function loginByCookie(session: string): Promise<User | null> {
+  if (!session) {
+    return Promise.resolve(null);
+  }
+  return getCurrentUser();
+}
+
+export function loginUser(
+  userName: string,
+  password: string
+): Promise<boolean> {
+  const data = {
+    username: userName,
+    password: password,
+  };
+
+  return axios
+    .post(API_URL + "login", data)
+    .then(async (response) => {
+      let session = response.data.cookie.session;
+      // 将session存储到cookie
+      document.cookie = `session=${session}; path=/`;
+      // 更新当前用户信息
+
+      let user = await getCurrentUser();
+      if (!user) {
+        showAlert("错误", "获取用户信息失败，请稍后再试");
+        return false;
+      }
+      currentUser.set(user);
+      return true;
+    })
+    .catch((error) => {
+      if (error.response && error.response.status === 400) {
+        showAlert("错误", "用户名或密码错误");
+      }
+      console.error("登录时出错:", error);
+      return false;
+    });
+}
+
+export function registerUser(
+  userName: string,
+  password: string
+): Promise<boolean> {
+  const data = {
+    username: userName,
+    password: password,
+  };
+
+  return axios
+    .post(API_URL + "register", data)
+    .then((response) => {
+      return true;
+    })
+    .catch((error) => {
+      if (error.response && error.response.status === 400) {
+        showAlert("错误", "用户名已存在, 请重新输入");
+      } else {
+        showAlert("错误", "注册失败，请稍后再试");
+      }
+      console.error("注册时出错:", error);
+      return false;
+    });
+}
+
+export function logoutUser() {
+  // 清除cookie后返回true
+  document.cookie = "session=; path=/";
+  return true;
+}

@@ -1,26 +1,43 @@
-<script>
+<script lang="ts">
   import * as Card from "$lib/components/ui/card/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Label } from "$lib/components/ui/label/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
   import { Plus } from "lucide-svelte";
   import { showAlert } from "$lib/stores/alert-dialog-store";
-  import { isLoggedIn } from "$lib/stores/user-functions";
   import { goto } from "$app/navigation";
+  import { billStore } from "$lib/stores/bill-store";
+  import { Bill } from "$lib/models/bill/bill";
+  import { user } from "$lib/stores/user-store";
+  import { saveBillLocal, saveUserLocal } from "$lib/stores/data-store";
 
   let title = $state("");
 
-  function addBill() {
-    if (!isLoggedIn) {
-      goto("/user/login");
-      showAlert("错误", "请先登录.");
+  async function addBill() {
+    if (!user) {
+      showAlert("错误", "用户信息获取失败.");
       return;
     }
-
     if (title.length < 3) {
       showAlert("错误", "标题长度至少为3个字符.");
       return;
     }
+
+    const newBill = new Bill(
+      title,
+      user,
+      [user],
+      [],
+      new Date().toISOString(),
+      new Date().toISOString()
+    );
+    await newBill.uploadToServer();
+    user.addNewOwnBill(newBill);
+
+    await saveUserLocal(user);
+    await saveBillLocal(newBill);
+    console.log("新账单已添加:", newBill);
+    billStore.addBill(newBill);
   }
 </script>
 

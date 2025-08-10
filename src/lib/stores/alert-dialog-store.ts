@@ -3,7 +3,7 @@ import { writable } from "svelte/store";
 export const alertDialogStore = writable({
   open: false,
   title: "",
-  description: ""
+  description: "",
 });
 
 export function showAlert(title: string, description: string) {

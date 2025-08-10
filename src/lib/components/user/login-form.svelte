@@ -4,7 +4,7 @@
   import { Input } from "$lib/components/ui/input/index.js";
   import * as Card from "$lib/components/ui/card/index.js";
   import { Label } from "$lib/components/ui/label/index.js";
-  import { login } from "$lib/stores/user-functions";
+  import { loginUser } from "$lib/stores/user-store";
   import { showAlert } from "$lib/stores/alert-dialog-store";
   import { goto } from "$app/navigation";
 
@@ -15,7 +15,7 @@
 
   const id = $props.id();
 
-  async function loginUser() {
+  async function login() {
     const data = {
       username: $state.snapshot(userName),
       password: $state.snapshot(password),
@@ -29,7 +29,7 @@
       showAlert("错误", "用户名长度不能小于3个字符");
       return;
     }
-    let isLoggedIn = await login($state.snapshot(userName), $state.snapshot(password));
+    let isLoggedIn = await loginUser($state.snapshot(userName), $state.snapshot(password));
     if (isLoggedIn) {
       // 登录成功，跳转到首页
       goto("/user");
@@ -68,7 +68,7 @@
           密码长度至少为15个字符, 或者至少包含一个数字和一个小写字母的8个字符.
         </Label>
       </div>
-      <Button type="submit" class="w-full" onclick={loginUser}>登录</Button>
+      <Button type="submit" class="w-full" onclick={login}>登录</Button>
     </div>
     <div class="mt-4 text-center text-sm">
       还没有帐户?

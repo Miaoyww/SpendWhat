@@ -8,7 +8,7 @@
   import { goto } from "$app/navigation";
   import MyAlertDialog from "$lib/components/MyAlertDialog.svelte";
   import { showAlert } from "$lib/stores/alert-dialog-store";
-  import { login, register } from "$lib/stores/user-functions";
+  import { loginUser, registerUser } from "$lib/stores/user-store";
 
   const API_URL = "http://localhost:3000/api/user/register";
 
@@ -16,7 +16,7 @@
   let password = $state("");
   const id = $props.id();
 
-  async function registerUser() {
+  async function register() {
     // 检查用户名和密码是否为空
     if (!userName || !password) {
       showAlert("错误", "用户名和密码不能为空");
@@ -27,13 +27,13 @@
       showAlert("错误", "用户名长度不能小于3个字符");
       return;
     }
-    let isRegistered = await register(
+    let isRegistered = await registerUser(
       $state.snapshot(userName),
       $state.snapshot(password)
     );
 
     if (isRegistered) {
-      await login($state.snapshot(userName), $state.snapshot(password));
+      await loginUser($state.snapshot(userName), $state.snapshot(password));
       // 注册成功，跳转到用户主页
       goto("/user/");
     }
@@ -68,7 +68,7 @@
           密码长度至少为15个字符, 或者至少包含一个数字和一个小写字母的8个字符.
         </Label>
       </div>
-      <Button type="submit" class="w-full" onclick={registerUser}>注册</Button>
+      <Button type="submit" class="w-full" onclick={register}>注册</Button>
     </div>
     <div class="mt-4 text-center text-sm">
       已经有帐户?

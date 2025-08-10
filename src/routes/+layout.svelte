@@ -5,8 +5,24 @@
   import AppSidebar from "$lib/components/app-sidebar.svelte";
   import SiteHeader from "$lib/components/site-header.svelte";
   import MyAlertDialog from "$lib/components/MyAlertDialog.svelte";
+  import { loginByCookie } from "$lib/stores/user-store";
+  import { getBillsByUserId } from "$lib/stores/data-store";
+  import { billStore } from "$lib/stores/bill-store";
+  import { onMount } from "svelte";
+  const { data, children } = $props<{ data: { session: string }, children: any }>();
+  
+  onMount(async () => {
+    //启动时尝试登录
 
-  let { children } = $props();
+    let user = await loginByCookie(data.session);
+    //启动时尝试读取账单信息
+    if (user && user._id) {
+      let bills = await getBillsByUserId(user._id);
+      billStore.clear();
+      billStore.addBillList(bills);
+    }
+  });
+
 </script>
 
 <svelte:head>
