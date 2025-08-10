@@ -6,7 +6,7 @@
   import { Label } from "$lib/components/ui/label/index.js";
   import { loginUser } from "$lib/stores/user-store";
   import { showAlert } from "$lib/stores/alert-dialog-store";
-  import { goto } from "$app/navigation";
+  import { NavigateTo } from "$lib/stores/navigating";
 
   const API_URL = "http://localhost:3000/api/user/login";
 
@@ -32,7 +32,7 @@
     let isLoggedIn = await loginUser($state.snapshot(userName), $state.snapshot(password));
     if (isLoggedIn) {
       // 登录成功，跳转到首页
-      goto("/user");
+      NavigateTo("/user");
     }
   }
 </script>

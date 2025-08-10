@@ -6,12 +6,13 @@ import { deleteBillLocal, saveBillLocal } from "$lib/stores/data-store";
 
 // 定义 billStore 来存储所有账单
 const billsStore = writable<Bill[]>([]);
+const currentBill = writable<Bill | undefined>();
 
 // 获取单个账单
 function getBillById(id: string): Bill | undefined {
   let bills: Bill[] = [];
   billsStore.subscribe(($bills) => (bills = $bills));
-  return bills.find((bill) => bill._id === id);
+  return bills.find((bill) => bill.id === id);
 }
 
 // 添加新账单
@@ -27,22 +28,27 @@ function addBillList(newBill: Bill[]) {
 
 // 删除账单
 function removeBill(id: string) {
-  billsStore.update((bills) => bills.filter((bill) => bill._id !== id));
+  billsStore.update((bills) => bills.filter((bill) => bill.id !== id));
   deleteBillLocal(id);
 }
 
 // 清除账单
 function clear() {
+  billsStore.update((bills) => {
+    bills.length = 0;
+    return [...bills];
+  });
   billsStore.set([]);
 }
 
 // 更新账单
 function updateBill(updatedBill: Bill) {
   billsStore.update((bills) => {
-    const index = bills.findIndex((bill) => bill._id === updatedBill._id);
+    const index = bills.findIndex((bill) => bill.id === updatedBill.id);
     if (index !== -1) {
       bills[index] = updatedBill;
     }
+    saveBillLocal(updatedBill);
     return [...bills];
   });
 }
@@ -50,7 +56,7 @@ function updateBill(updatedBill: Bill) {
 // 添加账单项
 function addBillItem(billId: string, newItem: BillItem) {
   billsStore.update((bills) => {
-    const bill = bills.find((b) => b._id === billId);
+    const bill = bills.find((b) => b.id === billId);
     if (bill) {
       bill.addItem(newItem);
     }
@@ -61,9 +67,9 @@ function addBillItem(billId: string, newItem: BillItem) {
 // 移除账单项
 function removeBillItem(billId: string, itemId: string) {
   billsStore.update((bills) => {
-    const bill = bills.find((b) => b._id === billId);
+    const bill = bills.find((b) => b.id === billId);
     if (bill) {
-      bill.items = bill.items.filter((item) => item._id !== itemId);
+      bill.items = bill.items.filter((item) => item.id !== itemId);
     }
     return [...bills];
   });
@@ -71,6 +77,7 @@ function removeBillItem(billId: string, itemId: string) {
 
 export const billStore = {
   subscribe: billsStore.subscribe,
+  currentBill,
   getBillById,
   addBill,
   addBillList,

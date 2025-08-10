@@ -10,12 +10,12 @@
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
   import { Separator } from "$lib/components/ui/separator/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
-  import { goto } from "$app/navigation";
   import { currentUser } from "$lib/stores/user-store";
   import { User } from "$lib/models/user";
   import { billStore } from "$lib/stores/bill-store";
   import type { Bill } from "$lib/models/bill/bill";
   import BillSideCard from "$lib/components/bills/bill-side-card.svelte";
+  import { NavigateTo } from "$lib/stores/navigating";
 
   let user: User | null = $state(null);
 
@@ -55,7 +55,7 @@
                   class="flex items-center sm:flex outline outline-offset-2"
                   variant="ghost"
                   onclick={() => {
-                    goto("/");
+                    NavigateTo("/");
                   }}
                 >
                   <div class="flex -ml-3 items-center">

@@ -15,13 +15,13 @@ async function getDB() {
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       if (!db.objectStoreNames.contains(USER_STORE)) {
-        db.createObjectStore(USER_STORE, { keyPath: "_id" });
+        db.createObjectStore(USER_STORE, { keyPath: "id" });
       }
       if (!db.objectStoreNames.contains(BILL_STORE)) {
-        db.createObjectStore(BILL_STORE, { keyPath: "_id" });
+        db.createObjectStore(BILL_STORE, { keyPath: "id" });
       }
       if (!db.objectStoreNames.contains(ITEM_STORE)) {
-        db.createObjectStore(ITEM_STORE, { keyPath: "_id" });
+        db.createObjectStore(ITEM_STORE, { keyPath: "id" });
       }
     },
   });
@@ -32,7 +32,7 @@ export async function saveUserLocal(user: User) {
   const db = await getDB();
   const data = decycle(user);
   await db.put(USER_STORE, data);
-  localStorage.setItem(`user:${user._id}`, JSON.stringify(data));
+  localStorage.setItem(`user:${user.id}`, JSON.stringify(data));
 }
 
 export async function getUserLocal(userId: string): Promise<User | undefined> {
@@ -61,7 +61,7 @@ export async function saveBillLocal(bill: Bill) {
   const db = await getDB();
   const data = decycle(bill);
   await db.put(BILL_STORE, data);
-  localStorage.setItem(`bill:${bill._id}`, JSON.stringify(data));
+  localStorage.setItem(`bill:${bill.id}`, JSON.stringify(data));
 }
 
 export async function getBillLocal(billId: string): Promise<Bill | undefined> {
@@ -89,7 +89,7 @@ export async function getBillsByUserId(userId: string) {
   const db = await getDB();
   const allBills = await db.getAll(BILL_STORE);
   return allBills
-    .filter((b) => b.ownerId === userId)
+    .filter((b) => b.owner.id === userId)
     .sort(
       (a, b) =>
         new Date(b.created_time).getTime() - new Date(a.created_time).getTime()
@@ -151,7 +151,7 @@ function reviveBill(data: any): Bill {
 function reviveBillItem(data: any): BillItem {
   return Object.assign(
     new BillItem(
-      data._id,
+      data.id,
       data.bill,
       data.type,
       data.type_icon,

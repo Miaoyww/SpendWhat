@@ -5,11 +5,6 @@
   import { logoutUser } from "$lib/stores/user-store";
   export let data: { session: string };
 
-  //启动时尝试登录
-  $: if (typeof window !== "undefined" && !data.session) {
-    goto("/user/login");
-  }
-
   function logout(){
     logoutUser();
     goto("/user/login");

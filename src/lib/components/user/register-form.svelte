@@ -1,16 +1,11 @@
 <script lang="ts">
-  import axios from "axios";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
   import * as Card from "$lib/components/ui/card/index.js";
   import { Label } from "$lib/components/ui/label/index.js";
-  import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
-  import { goto } from "$app/navigation";
-  import MyAlertDialog from "$lib/components/MyAlertDialog.svelte";
   import { showAlert } from "$lib/stores/alert-dialog-store";
   import { loginUser, registerUser } from "$lib/stores/user-store";
-
-  const API_URL = "http://localhost:3000/api/user/register";
+  import { NavigateTo } from "$lib/stores/navigating";
 
   let userName = $state("");
   let password = $state("");
@@ -35,7 +30,7 @@
     if (isRegistered) {
       await loginUser($state.snapshot(userName), $state.snapshot(password));
       // 注册成功，跳转到用户主页
-      goto("/user/");
+      NavigateTo("/user/");
     }
   }
 </script>

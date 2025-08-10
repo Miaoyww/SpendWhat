@@ -8,11 +8,16 @@
   import { goto } from "$app/navigation";
   import { billStore } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill/bill";
-  import { user } from "$lib/stores/user-store";
   import { saveBillLocal, saveUserLocal } from "$lib/stores/data-store";
+  import { NavigateTo } from "$lib/stores/navigating";
+  import { currentUser } from "$lib/stores/user-store";
+  import type { User } from "$lib/models/user";
 
   let title = $state("");
-
+  let user: User | null = $state(null);
+  currentUser.subscribe((value) => {
+    user = value;
+  });
   async function addBill() {
     if (!user) {
       showAlert("错误", "用户信息获取失败.");
@@ -38,6 +43,8 @@
     await saveBillLocal(newBill);
     console.log("新账单已添加:", newBill);
     billStore.addBill(newBill);
+
+    NavigateTo(`/bill/detail?id=${newBill.id}`);
   }
 </script>
 

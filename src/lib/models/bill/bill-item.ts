@@ -2,7 +2,7 @@ import { Bill } from './bill';
 
 
 export class BillItem {
-  _id: string;
+  id: string;
   bill: Bill;
   type: string;
   type_icon: string;
@@ -13,7 +13,7 @@ export class BillItem {
   occurred_time: Date;
 
   constructor(
-    _id: string,
+    id: string,
     bill: Bill,
     type: string,
     type_icon: string,
@@ -23,7 +23,7 @@ export class BillItem {
     created_time: string,
     occurred_time: string
   ) {
-    this._id = _id;
+    this.id = id;
     this.bill = bill;
     this.type = type;
     this.type_icon = type_icon;

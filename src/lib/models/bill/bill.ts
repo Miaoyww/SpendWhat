@@ -5,7 +5,7 @@ import { showAlert } from "$lib/stores/alert-dialog-store";
 import axios from "axios";
 
 export class Bill {
-  _id?: string;
+  id?: string;
   title: string;
   owner: User;
   members: User[];
@@ -59,7 +59,7 @@ export class Bill {
         item_updated_time: this.item_updated_time
       }
       //随机生成uuid
-      this._id = crypto.randomUUID();
+      this.id = crypto.randomUUID();
     } catch (error) {
       showAlert("错误", "上传账单失败.");
       console.error("上传账单失败:", error);
@@ -73,13 +73,13 @@ export class Bill {
 
   // 删除账单项
   removeItem(itemId: string) {
-    this.items = this.items.filter((item) => item._id !== itemId);
+    this.items = this.items.filter((item) => item.id !== itemId);
     this.updateItemTime();
   }
 
   // 更新账单项
   updateItem(updatedItem: BillItem) {
-    const index = this.items.findIndex((item) => item._id === updatedItem._id);
+    const index = this.items.findIndex((item) => item.id === updatedItem.id);
     if (index !== -1) {
       this.items[index] = updatedItem;
       this.updateItemTime();
@@ -88,7 +88,7 @@ export class Bill {
 
   // 根据ID获取账单项
   getItemById(itemId: string): BillItem | undefined {
-    return this.items.find((item) => item._id === itemId);
+    return this.items.find((item) => item.id === itemId);
   }
 
   // 添加新成员

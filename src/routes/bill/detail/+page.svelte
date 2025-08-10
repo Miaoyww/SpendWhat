@@ -1,16 +1,14 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
+  import { page } from "$app/state";
+  import { billStore } from "$lib/stores/bill-store";
 
   // 读取查询参数 id
-  let id: string | null = null;
+  let id: string | null = $state(null);
 
-  $: id = $page.url.searchParams.get('id');
-
-  onMount(() => {
+  $effect(() => {
+    id = page.url.searchParams.get("id");
     if (id) {
-      // TODO: 用 id 去请求账单数据
-      console.log('当前账单ID:', id);
+      billStore.currentBill.set(billStore.getBillById(id));
     }
   });
 </script>
