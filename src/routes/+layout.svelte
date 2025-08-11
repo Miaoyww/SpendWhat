@@ -5,17 +5,17 @@
   import AppSidebar from "$lib/components/app-sidebar.svelte";
   import SiteHeader from "$lib/components/site-header.svelte";
   import MyAlertDialog from "$lib/components/MyAlertDialog.svelte";
-  import { currentUser, loginByCookie } from "$lib/stores/user-store";
-  import { getBillsByUserId } from "$lib/stores/data-store";
-  import { billStore } from "$lib/stores/bill-store";
   import { onMount } from "svelte";
+  import { loginByCookie } from "$lib/stores/user-store";
+
+
   const { data, children } = $props<{
     data: { session: string };
     children: any;
   }>();
+
   onMount(async () => {
     //启动时尝试登录
-
     await loginByCookie(data.session);
   });
 </script>

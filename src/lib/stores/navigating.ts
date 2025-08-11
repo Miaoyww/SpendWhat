@@ -1,6 +1,5 @@
 import { writable } from "svelte/store";
 import { goto } from "$app/navigation";
-import { navigating, page } from "$app/state";
 import {  currentBill } from "$lib/stores/bill-store";
 export let isBillPage = writable<boolean>(false);
 

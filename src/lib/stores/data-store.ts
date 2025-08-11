@@ -96,7 +96,6 @@ export async function getBillsByUserId(userId: string) {
     );
 }
 
-
 /* ---------------- 账单项 ---------------- */
 export async function saveBillItemLocal(item: BillItem) {
   const db = await getDB();
@@ -117,7 +116,6 @@ export async function getAllBillItemsLocal(): Promise<BillItem[]> {
   return all.map(reviveBillItem);
 }
 
-
 export async function deleteBillItemLocal(billId: string) {
   const db = await getDB();
   if (!db) return;
@@ -126,7 +124,7 @@ export async function deleteBillItemLocal(billId: string) {
 
 /* ---------------- 类实例恢复 ---------------- */
 function reviveUser(data: any): User {
-  const u = Object.assign(new User(data.username), data);
+  const u = Object.assign(new User(data.id, data.username), data);
   if (u.bills) u.bills = u.bills.map(reviveBill);
   if (u.created_bills) u.created_bills = u.created_bills.map(reviveBill);
   return u;

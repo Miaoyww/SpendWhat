@@ -5,7 +5,6 @@
   import { Input } from "$lib/components/ui/input/index.js";
   import { Plus } from "lucide-svelte";
   import { showAlert } from "$lib/stores/alert-dialog-store";
-  import { goto } from "$app/navigation";
   import { billStore } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill/bill";
   import { saveBillLocal, saveUserLocal } from "$lib/stores/data-store";

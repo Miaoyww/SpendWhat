@@ -2,7 +2,6 @@ import axios from "axios";
 import { writable } from "svelte/store";
 import { showAlert } from "./alert-dialog-store";
 import { User } from "$lib/models/user";
-import { Bill } from "$lib/models/bill/bill";
 import {
   saveUserLocal,
   getBillsByUserId,
@@ -21,20 +20,6 @@ let user: User | null = null;
 currentUser.subscribe((value) => {
   user = value;
 });
-// export function getCurrentUser(): Promise<User | null> {
-
-//   return axios
-//     .get(API_URL + "self/get")
-//     .then((response) => {
-//       currentUser.set(response.data.user);
-//       //TODO: 获取当前用户信息
-//       return response.data.user;
-//     })
-//     .catch((error) => {
-//       console.error("获取当前用户信息时出错:", error);
-//       return null;
-//     });
-// }
 
 export async function getCurrentUser(): Promise<User | null> {
   return api

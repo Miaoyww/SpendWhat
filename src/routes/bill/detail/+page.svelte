@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { billStore, currentBill } from "$lib/stores/bill-store";
-  import { NavigateTo } from "$lib/stores/navigating";
 
   // 读取查询参数 id
   let id: string | null = $state(null);
