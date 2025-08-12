@@ -13,8 +13,14 @@
   import { currentUser } from "$lib/stores/user-store";
   import { billStore } from "$lib/stores/bill-store";
   import BillSideCard from "$lib/components/bills/bill-side-card.svelte";
-  import { NavigateTo } from "$lib/stores/navigating";
+  import { NavigateTo } from "$lib/utils/navigating";
+  import type { Bill } from "$lib/models/bill/bill";
 
+  let items: Bill[] = $state([]);
+  billStore.subscribe((value) => {
+    //按照时间顺序排列
+    items = value.slice().sort((a, b) => new Date(b.created_time).getTime() - new Date(a.created_time).getTime());
+  });
 </script>
 
 <Sidebar.Root>
@@ -67,8 +73,9 @@
             <span class="ml-3 mb-2 font-medium text-base text-gray-600"
               >账单</span
             >
+
             {#if $currentUser}
-              {#each $billStore as item (item.id)}
+              {#each items as item (item.id)}
                 <BillSideCard billItem={item} />
               {/each}
             {/if}

@@ -29,37 +29,106 @@ export class Bill {
     this.item_updated_time = new Date(item_updated_time);
   }
 
-  async uploadToServer() {
+  async createToServer() {
     try {
       let data = {
         title: this.title,
       };
-
       const response = await api.post("/bill/create", data);
       console.log("上传账单成功:", response.data);
       this.id = response.data.bill_id;
     } catch (error) {
-      showAlert("错误", "上传账单失败.");
-      console.error("上传账单失败:", error);
+      showAlert("错误", "账单创建失败.");
+      console.error("账单创建失败:", error);
     }
   }
 
-  addItem(newItem: BillItem) {
+  async updateToServer() {
+    // try {
+    //   //将Bill模型转为json
+    //   let data = {
+    //     id: this.id,
+    //     title: this.title,
+    //     owner_id: this.owner.id,
+    //     members_id: this.members.map(member => member.id),
+    //     items_id: this.items.map(item => item.id),
+    //   };
+    //   console.log("上传账单数据:", data);
+    //   const response = await api.post("/bill/update", data);
+    //   console.log("上传账单成功:", response.data);
+    //   this.id = response.data.bill_id;
+    // } catch (error) {
+    //   showAlert("错误", "上传账单失败.");
+    //   console.error("上传账单失败:", error);
+    // }
+  }
+
+  async getItemFromServer() {
+    if (!this.id) {
+      return;
+    }
+    this.items = [];
+    try {
+      let data = {
+        bill_id: this.id,
+        skip: 0,
+        limit: 30,
+      };
+      const response = await api.post(`/bill/item/list`, data);
+
+      response.data.forEach((item: any) => {
+        //如果id有重则不新建
+        if (!this.items.find((i) => i.id === item._id)) {
+          const billItem = new BillItem(
+            this,
+            item.type,
+            item.type_icon,
+            item.description,
+            item.amount as number,
+            item.currency,
+            this.members[0],
+            new Date().toISOString(),
+            new Date().toISOString()
+          );
+          billItem.id = item._id; // 赋值数据库id
+          this.items.push(billItem);
+        }
+      });
+    } catch (error) {
+      showAlert("错误", "获取账单失败.");
+      console.error("获取账单失败:", error);
+    }
+  }
+
+  async addItem(newItem: BillItem) {
     this.items.push(newItem);
     this.updateItemTime();
   }
 
   // 删除账单项
-  removeItem(itemId: string) {
-    this.items = this.items.filter((item) => item.id !== itemId);
-    this.updateItemTime();
+  async removeItem(updatedItem: BillItem) {
+    const index = this.items.findIndex((item) => item.id === updatedItem.id);
+    if (index !== -1) {
+      this.items.splice(index, 1);
+      let data = {
+        bill_id: this.id,
+        item_id: updatedItem.id,
+      };
+      await api.post("/bill/item/delete", data).then((response) => {
+        if (response.status !== 200) {
+          showAlert("错误", `账单项未能正确删除. ${response.status}`);
+        }
+        this.updateItemTime();
+      });
+    }
   }
 
   // 更新账单项
-  updateItem(updatedItem: BillItem) {
+  async updateItem(updatedItem: BillItem) {
     const index = this.items.findIndex((item) => item.id === updatedItem.id);
     if (index !== -1) {
       this.items[index] = updatedItem;
+      await updatedItem.updateToServer();
       this.updateItemTime();
     }
   }
@@ -72,11 +141,13 @@ export class Bill {
   // 添加新成员
   addNewMember(user: User) {
     this.members.push(user);
+    this.updateToServer();
   }
 
   // 更新账单项更新时间
   private updateItemTime() {
     this.item_updated_time = new Date();
+    this.updateToServer();
   }
 }
 

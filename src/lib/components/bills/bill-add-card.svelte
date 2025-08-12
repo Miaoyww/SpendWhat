@@ -8,7 +8,7 @@
   import { billStore } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill/bill";
   import { saveBillLocal, saveUserLocal } from "$lib/stores/data-store";
-  import { NavigateTo } from "$lib/stores/navigating";
+  import { NavigateTo } from "$lib/utils/navigating";
   import { currentUser } from "$lib/stores/user-store";
   import type { User } from "$lib/models/user";
 
@@ -35,10 +35,11 @@
       new Date().toISOString(),
       new Date().toISOString()
     );
-    await newBill.uploadToServer();
-    
+
+    await newBill.createToServer();
     await saveUserLocal(user);
     await saveBillLocal(newBill);
+
     console.log("新账单已添加:", newBill);
     billStore.addBill(newBill);
 

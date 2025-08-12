@@ -6,7 +6,7 @@
   import { Label } from "$lib/components/ui/label/index.js";
   import { loginUser } from "$lib/stores/user-store";
   import { showAlert } from "$lib/stores/alert-dialog-store";
-  import { NavigateTo } from "$lib/stores/navigating";
+  import { NavigateTo } from "$lib/utils/navigating";
 
   const API_URL = "http://localhost:3000/api/user/login";
 

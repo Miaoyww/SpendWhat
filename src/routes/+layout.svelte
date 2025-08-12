@@ -7,7 +7,8 @@
   import MyAlertDialog from "$lib/components/MyAlertDialog.svelte";
   import { onMount } from "svelte";
   import { loginByCookie } from "$lib/stores/user-store";
-
+  import { isBillPageNow } from "$lib/utils/navigating";
+  import { onNavigate } from "$app/navigation";
 
   const { data, children } = $props<{
     data: { session: string };
@@ -17,6 +18,15 @@
   onMount(async () => {
     //启动时尝试登录
     await loginByCookie(data.session);
+
+    //防止一开始就是bill页面
+    isBillPageNow();
+  });
+
+  onNavigate((nav) => {
+    if (nav.to?.url) {
+      isBillPageNow(nav.to.url.pathname);
+    }
   });
 </script>
 

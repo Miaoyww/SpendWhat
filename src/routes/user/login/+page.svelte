@@ -1,6 +1,6 @@
 <script>
   import LoginForm from "$lib/components/user/login-form.svelte";
-  import { NavigateTo } from "$lib/stores/navigating";
+  import { NavigateTo } from "$lib/utils/navigating";
   import { currentUser } from "$lib/stores/user-store";
   
   //如果已经登录，直接跳转至user

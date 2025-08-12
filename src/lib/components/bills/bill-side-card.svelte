@@ -16,7 +16,7 @@
   import { User } from "$lib/models/user";
   import { billStore, currentBill } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill/bill";
-  import { NavigateTo } from "$lib/stores/navigating";
+  import { NavigateTo } from "$lib/utils/navigating";
   import { Input } from "$lib/components/ui/input/index.js";
   import { HOST_URL } from "$lib/utils/request";
 

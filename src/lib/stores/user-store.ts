@@ -9,6 +9,7 @@ import {
 } from "$lib/stores/data-store";
 import { billStore, getCurrentUserBillsFromServer } from "./bill-store";
 import api from "$lib/utils/request";
+import type { Bill } from "$lib/models/bill/bill";
 
 const API_URL = "http://localhost:3000/api/user/";
 
@@ -28,12 +29,15 @@ export async function getCurrentUser(): Promise<User | null> {
       user = new User(response.data.id, response.data.username);
       currentUser.set(user);
       await saveUserLocal(user);
-      console.log("获取当前用户信息:", user);
+
       if (user && user.id) {
         let bills = await getCurrentUserBillsFromServer();
+
         if (!bills) {
           bills = await getBillsByUserId(user.id);
         }
+
+
         billStore.clear();
         billStore.addBillList(bills);
       }
@@ -116,9 +120,6 @@ export function registerUser(
 export function logoutUser() {
   // 清除cookie后返回true
   document.cookie = "session=; path=/";
-  if (user?.id) {
-    deleteUserLocal(user.id);
-  }
   console.log("用户已登出");
   currentUser.set(null);
   billStore.clear();

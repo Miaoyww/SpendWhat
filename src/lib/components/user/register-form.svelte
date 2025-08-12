@@ -5,7 +5,7 @@
   import { Label } from "$lib/components/ui/label/index.js";
   import { showAlert } from "$lib/stores/alert-dialog-store";
   import { loginUser, registerUser } from "$lib/stores/user-store";
-  import { NavigateTo } from "$lib/stores/navigating";
+  import { NavigateTo } from "$lib/utils/navigating";
 
   let userName = $state("");
   let password = $state("");

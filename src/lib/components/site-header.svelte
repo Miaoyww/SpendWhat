@@ -3,7 +3,7 @@
   import { Separator } from "$lib/components/ui/separator/index.js";
   import { Plus, Settings, SquareArrowOutUpRight } from "lucide-svelte";
   import SidebarTrigger from "$lib/components/ui/sidebar/sidebar-trigger.svelte";
-  import { NavigateTo, isBillPage } from "$lib/stores/navigating";
+  import { NavigateTo, isBillPage } from "$lib/utils/navigating";
   import { currentBill } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill/bill";
   let isBillNow: boolean = $state(false);

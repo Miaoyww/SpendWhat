@@ -11,7 +11,7 @@ import { currentUser } from "$lib/stores/user-store";
 import api from "$lib/utils/request";
 import type { User } from "$lib/models/user";
 import { showAlert } from "./alert-dialog-store";
-import { NavigateTo } from "$lib/stores/navigating";
+import { NavigateTo } from "$lib/utils/navigating";
 
 // 定义 billStore 来存储所有账单
 const billsStore = writable<Bill[]>([]);
@@ -133,6 +133,10 @@ export function getCurrentUserBillsFromServer(): Bill[] {
     });
     if (user) {
       const bills = mapResponseToBills(billsRaw, user);
+      // 给每个bill的member都添加上创建者自己
+      (bills as Bill[]).forEach((bill) => {
+        bill.members.push(bill.owner);
+      });
       billsStore.set(bills);
       return bills.sort(
         (a, b) =>
