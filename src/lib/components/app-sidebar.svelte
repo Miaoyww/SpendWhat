@@ -14,7 +14,7 @@
   import { billStore } from "$lib/stores/bill-store";
   import BillSideCard from "$lib/components/bills/bill-side-card.svelte";
   import { NavigateTo } from "$lib/utils/navigating";
-  import type { Bill } from "$lib/models/bill/bill";
+  import type { Bill } from "$lib/models/bill";
 
   let items: Bill[] = $state([]);
   billStore.subscribe((value) => {
@@ -92,7 +92,6 @@
           <Sidebar.MenuButton>
             <div style="display: flex; align-items: center;">
               <a href="/user" class="flex items-center">
-                <UserIcon />
                 {#if $currentUser}
                   <span class="ml-1">{$currentUser.username}</span>
                 {:else}
@@ -105,7 +104,7 @@
         <div style="float: right;">
           <Sidebar.MenuButton>
             <a href="/settings">
-              <SettingsIcon />
+              <SettingsIcon size={18}/>
             </a>
           </Sidebar.MenuButton>
         </div>
