@@ -19,6 +19,7 @@
   import { NavigateTo } from "$lib/utils/navigating";
   import { Input } from "$lib/components/ui/input/index.js";
   import { HOST_URL } from "$lib/utils/request";
+  import { cn } from "$lib/utils";
 
   const props = $props<{ billItem: Bill }>();
   const { billItem } = props;
@@ -28,7 +29,13 @@
   let isSharing = $state(false);
 
   let title: string = $state(billItem.title);
+  let className = $state("");
 
+  currentBill.subscribe((value) => {
+    if (value) {
+      className = value.id === billItem.id ? "bg-gray-200" : "";
+    }
+  });
   currentUser.subscribe((value) => {
     user = value;
   });
@@ -84,7 +91,10 @@
   </DialogContent>
 </Dialog>
 <Sidebar.MenuButton
-  class="flex justify-between items-center flex-1 text-left group/item h-10 mt-2 rounded-xl cursor-pointer"
+  class={cn(
+    "flex justify-between items-center flex-1 text-left group/item h-10 mt-2 rounded-xl cursor-pointer",
+    className
+  )}
 >
   <Button
     class="outline outline-offset-2 p-0"
