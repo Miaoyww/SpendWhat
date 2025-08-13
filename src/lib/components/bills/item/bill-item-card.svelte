@@ -79,9 +79,6 @@
   let open = $state(false);
   let value = $state(item.created_by.username);
   let triggerRef = $state<HTMLButtonElement>(null!);
-  $effect(() => {
-    console.log(occurred_time);
-  });
   const selectedValue = $derived(
     (item.bill.members as User[]).find((f) => f.username === value)?.username
   );

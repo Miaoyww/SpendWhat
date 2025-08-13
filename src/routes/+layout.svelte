@@ -9,7 +9,7 @@
   import { loginByCookie } from "$lib/stores/user-store";
   import { isBillPageNow } from "$lib/utils/navigating";
   import { onNavigate } from "$app/navigation";
-
+  
   const { data, children } = $props<{
     data: { session: string };
     children: any;
