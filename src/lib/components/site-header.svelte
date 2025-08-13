@@ -5,7 +5,7 @@
   import SidebarTrigger from "$lib/components/ui/sidebar/sidebar-trigger.svelte";
   import { NavigateTo, isBillPage } from "$lib/utils/navigating";
   import { currentBill } from "$lib/stores/bill-store";
-  import { Bill } from "$lib/models/bill/bill";
+  import { Bill } from "$lib/models/bill";
   let isBillNow: boolean = $state(false);
 
   let _currentBill: Bill | null = $state(null);

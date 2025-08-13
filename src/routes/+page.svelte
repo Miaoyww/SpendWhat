@@ -1,6 +1,5 @@
 <script lang="ts">
   import BillAddCard from "$lib/components/bills/bill-add-card.svelte";
-
 </script>
 
 <!--写一个首页，首先欢迎用户，提示用户添加第一个账单开始-->

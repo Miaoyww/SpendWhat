@@ -23,8 +23,8 @@ export class BillItem {
     amount: number,
     currency: string,
     created_by: User,
-    created_time: string,
-    occurred_time: string
+    created_time: Date,
+    occurred_time: Date
   ) {
     this.created_by = created_by;
     this.bill = bill;

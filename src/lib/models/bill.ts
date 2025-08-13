@@ -1,4 +1,4 @@
-import { BillItem } from "$lib/models/bill/bill-item";
+import { BillItem } from "$lib/models/bill-item";
 import { User } from "$lib/models/user";
 import api from "$lib/utils/request";
 import { showAlert } from "$lib/stores/alert-dialog-store";
@@ -87,8 +87,8 @@ export class Bill {
             item.amount as number,
             item.currency,
             this.members[0],
-            new Date().toISOString(),
-            new Date().toISOString()
+            new Date(item.created_time),
+            new Date(item.occurred_time)
           );
           billItem.id = item._id; // 赋值数据库id
           this.items.push(billItem);

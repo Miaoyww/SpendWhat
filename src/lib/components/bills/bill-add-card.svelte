@@ -6,7 +6,7 @@
   import { Plus } from "lucide-svelte";
   import { showAlert } from "$lib/stores/alert-dialog-store";
   import { billStore } from "$lib/stores/bill-store";
-  import { Bill } from "$lib/models/bill/bill";
+  import { Bill } from "$lib/models/bill";
   import { saveBillLocal, saveUserLocal } from "$lib/stores/data-store";
   import { NavigateTo } from "$lib/utils/navigating";
   import { currentUser } from "$lib/stores/user-store";

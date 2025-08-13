@@ -1,28 +1,23 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import BillItemCard from "$lib/components/bills/bill-item-card.svelte";
+  import BillItemAddCard from "$lib/components/bills/item/bill-item-add-card.svelte";
+  import BillItemCard from "$lib/components/bills/item/bill-item-card.svelte";
   import { Button } from "$lib/components/ui/button";
-  import { Input } from "$lib/components/ui/input";
-  import { Bill } from "$lib/models/bill/bill";
-  import { BillItem } from "$lib/models/bill/bill-item";
+  import { Bill } from "$lib/models/bill";
+  import { BillItem } from "$lib/models/bill-item";
   import { User } from "$lib/models/user";
   import { billStore, currentBill } from "$lib/stores/bill-store";
   import { currentUser } from "$lib/stores/user-store";
+  import { Menu, Plus } from "lucide-svelte";
   import { onMount } from "svelte";
+  import * as Card from "$lib/components/ui/card/index.js";
+  import { Label } from "$lib/components/ui/label";
 
-  let bill: Bill | undefined;
-  let user: User | null;
+  let bill: Bill | undefined = $state();
   let id: string | null = $state(null);
 
-  let bill_type: string = $state("expense"); // 默认账单类型
-  let description: string = $state("AAA");
-  let amount: number = $state(0);
-  let currency: string = $state("CNY");
-  let emoji: string = $state("😭");
+  let showAddDialog = $state(false);
 
-  currentUser.subscribe((value) => {
-    user = value;
-  });
   let sortedBillItems = $state<BillItem[]>([]);
 
   currentBill.subscribe((value) => {
@@ -63,40 +58,66 @@
       sortedBillItems = [];
     }
   }
-
-  async function addNewItem() {
-    if (!user) {
-      return;
-    }
-    if (!bill) {
-      return;
-    }
-    let newItem = new BillItem(
-      bill,
-      bill_type,
-      emoji,
-      description,
-      amount,
-      currency,
-      user,
-      new Date().toISOString(),
-      new Date().toISOString()
-    );
-    await newItem.createToServer();
-    bill?.addItem(newItem);
-
-    currentBill.set(bill);
-  }
 </script>
 
-<h1>账单详情页</h1>
-<p>账单ID: {id}</p>
-<Button onclick={addNewItem}>Add New</Button>
-<Input bind:value={bill_type} placeholder="类型" />
-<Input bind:value={description} placeholder="description" />
-<Input bind:value={amount} type="number" placeholder="amount" />
-<Input bind:value={emoji} type="str" placeholder="emoji" />
-<Input bind:value={currency} placeholder="currency" />
+<div class="grid grid-cols-2 lg:grid-cols-2 gap-2 mb-8">
+  <!-- 团队预算 -->
+  <Card.Root class="flex flex-col">
+    <Card.Content>
+      <!-- 上方内容 -->
+      <div class="flex flex-col items-left">
+        <Label class="text-lg font-bold">你已支出</Label>
+        <Label class="text-base font-bold">6136.59 CNY</Label>
+      </div>
+
+      <!-- 底部按钮 -->
+      <div class="flex justify-center">
+        <Button
+          variant="ghost"
+          class="mt-3 w-28 h-28 rounded-full border-6 border-gray-300 items-center text-sm"
+        >
+          添加预算
+        </Button>
+      </div>
+    </Card.Content>
+  </Card.Root>
+
+  <!-- 右边上下排列 -->
+  <div class="flex flex-col gap-2">
+    <!-- 团队共支出 -->
+    <Card.Root>
+      <Card.Content class="flex flex-col items-left justify-center">
+        <!--左并列-->
+        <div class="flex flex-col items-left">
+          <Label class="text-lg font-bold">团队共支出</Label>
+          <Label class="text-base font-bold">6136.59 CNY</Label>
+        </div>
+
+        <div class="text-base mt-2">1423 笔交易</div>
+      </Card.Content>
+    </Card.Root>
+
+    <!-- 成员管理 -->
+    <Card.Root>
+      <Card.Content class="p-0">
+        <div class="flex items-center justify-between ml-5">
+          <!-- 左边文字 -->
+          <div class="flex flex-col">
+            <Label class="text-base font-bold">成员管理</Label>
+            <Label class="text-sm">当前 N 名成员</Label>
+          </div>
+
+          <!-- 右边图标按钮 -->
+          <Button variant="ghost" class="mr-3">
+            <Menu size={36} />
+          </Button>
+        </div>
+      </Card.Content>
+    </Card.Root>
+  </div>
+</div>
+
+<Label class="text-lg mb-2">账单</Label>
 
 {#if $currentBill}
   {#if sortedBillItems}
@@ -107,3 +128,15 @@
     </div>
   {/if}
 {/if}
+
+<Button
+  class="absolute bottom-10 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full shadow-lg"
+  onclick={() => {
+    showAddDialog = true;
+    console.log(showAddDialog);
+  }}
+>
+  <Plus size={36} />
+</Button>
+
+<BillItemAddCard title="添加新账单" bind:open={showAddDialog} {bill} />

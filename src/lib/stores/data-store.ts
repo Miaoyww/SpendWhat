@@ -1,6 +1,6 @@
 import { openDB } from "idb";
-import { Bill } from "$lib/models/bill/bill";
-import { BillItem } from "$lib/models/bill/bill-item";
+import { Bill } from "$lib/models/bill";
+import { BillItem } from "$lib/models/bill-item";
 import { User } from "$lib/models/user";
 import { decycle } from "$lib/utils/decycle";
 

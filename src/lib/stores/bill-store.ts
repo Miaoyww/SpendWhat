@@ -4,8 +4,8 @@ import {
   Bill,
   type BillResponseItem,
   mapResponseToBills,
-} from "$lib/models/bill/bill";
-import { BillItem } from "$lib/models/bill/bill-item";
+} from "$lib/models/bill";
+import { BillItem } from "$lib/models/bill-item";
 import { deleteBillLocal, saveBillLocal } from "$lib/stores/data-store";
 import { currentUser } from "$lib/stores/user-store";
 import api from "$lib/utils/request";

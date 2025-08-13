@@ -4,7 +4,7 @@
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
   import AppSidebar from "$lib/components/app-sidebar.svelte";
   import SiteHeader from "$lib/components/site-header.svelte";
-  import MyAlertDialog from "$lib/components/MyAlertDialog.svelte";
+  import MyAlertDialog from "$lib/components/my-alert-dialog.svelte";
   import { onMount } from "svelte";
   import { loginByCookie } from "$lib/stores/user-store";
   import { isBillPageNow } from "$lib/utils/navigating";

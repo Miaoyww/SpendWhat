@@ -1,4 +1,4 @@
-import type { Bill } from "$lib/models/bill/bill";
+import type { Bill } from "$lib/models/bill";
 import api from "$lib/utils/request";
 
 export class User {
