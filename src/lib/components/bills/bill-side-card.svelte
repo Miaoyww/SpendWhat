@@ -102,7 +102,7 @@
 
   <DropdownMenu.Root>
     <DropdownMenu.Trigger
-      class="group/edit invisible group-hover/item:visible ghost bg-transparent px-2 py-1 text-sm rounded"
+      class="group/edit visible md:invisible md:group-hover/item:visible ghost bg-transparent px-2 py-1 text-sm rounded"
     >
       <Ellipsis strokeWidth={1} />
     </DropdownMenu.Trigger>
