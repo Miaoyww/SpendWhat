@@ -9,7 +9,8 @@
   import { loginByCookie } from "$lib/stores/user-store";
   import { isBillPageNow } from "$lib/utils/navigating";
   import { onNavigate } from "$app/navigation";
-  
+  import { Toaster } from "$lib/components/ui/sonner/index.js";
+
   const { data, children } = $props<{
     data: { session: string };
     children: any;
@@ -33,7 +34,7 @@
 <svelte:head>
   <link rel="icon" href={favicon} />
 </svelte:head>
-
+<Toaster />
 <Sidebar.Provider
   style="--sidebar-width: calc(var(--spacing) * 72); --header-height: calc(var(--spacing) * 12);"
 >

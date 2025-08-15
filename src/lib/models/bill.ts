@@ -3,12 +3,13 @@ import { User } from "$lib/models/user";
 import api from "$lib/utils/request";
 import { showAlert } from "$lib/stores/alert-dialog-store";
 import axios from "axios";
+import { BillMember } from "$lib/models/bill-member";
 
 export class Bill {
   id?: string;
   title: string;
   owner: User;
-  members: User[];
+  members: BillMember[];
   items: BillItem[]; // 可以换成 Member[] 如果成员有更多信息
   created_time: Date;
   item_updated_time: Date;
@@ -16,7 +17,7 @@ export class Bill {
   constructor(
     title: string,
     owner: User,
-    members: User[],
+    members: BillMember[],
     items: BillItem[],
     created_time: string,
     item_updated_time: string
@@ -35,8 +36,7 @@ export class Bill {
         title: this.title,
       };
       const response = await api.post("/bill/create", data);
-      console.log("上传账单成功:", response.data);
-      this.id = response.data.bill_id;
+      this.id = response.data._id;
     } catch (error) {
       showAlert("错误", "账单创建失败.");
       console.error("账单创建失败:", error);
@@ -77,6 +77,7 @@ export class Bill {
       const response = await api.post(`/bill/item/list`, data);
 
       response.data.forEach((item: any) => {
+
         //如果id有重则不新建
         if (!this.items.find((i) => i.id === item._id)) {
           const billItem = new BillItem(
@@ -86,7 +87,7 @@ export class Bill {
             item.description,
             item.amount as number,
             item.currency,
-            this.members[0],
+            new BillMember(item.paid_by.name, item.paid_by.id),
             new Date(item.created_time),
             new Date(item.occurred_time)
           );
@@ -110,16 +111,8 @@ export class Bill {
     const index = this.items.findIndex((item) => item.id === updatedItem.id);
     if (index !== -1) {
       this.items.splice(index, 1);
-      let data = {
-        bill_id: this.id,
-        item_id: updatedItem.id,
-      };
-      await api.post("/bill/item/delete", data).then((response) => {
-        if (response.status !== 200) {
-          showAlert("错误", `账单项未能正确删除. ${response.status}`);
-        }
-        this.updateItemTime();
-      });
+      await updatedItem.remove();
+      this.updateItemTime();
     }
   }
 
@@ -139,8 +132,8 @@ export class Bill {
   }
 
   // 添加新成员
-  addNewMember(user: User) {
-    this.members.push(user);
+  addNewMember(member: BillMember) {
+    this.members.push(member);
     this.updateToServer();
   }
 
@@ -164,21 +157,23 @@ export function mapResponseToBills(
   currentUser: User
 ): Bill[] {
   return responseData.map((item) => {
-    // 这里假设成员为空或者可以进一步处理 members 数据
-    const members: User[] = []; // 你需要根据实际成员数据结构改
+    console.log("映射账单数据:", item);
+    const members: BillMember[] = [];
+    item.members.forEach(m => {
+      members.push(new BillMember(m.name, m._id));
+    });
 
-    // items 默认为空数组，因为后端没给
     const items: BillItem[] = [];
 
     const bill = new Bill(
       item.title,
-      currentUser, // 假设当前用户为 owner，或者后端有owner字段时用它
+      currentUser,
       members,
       items,
       item.created_time,
       item.item_updated_time
     );
-    bill.id = item._id; // 赋值数据库id
+    bill.id = item._id;
     return bill;
   });
 }

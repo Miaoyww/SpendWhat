@@ -10,7 +10,6 @@ export function NavigateTo(url: string) {
 }
 
 
-
 export function isBillPageNow(url: string = ""): boolean {
   let isBillDetailOrSettings;
   if (url) {
@@ -22,18 +21,6 @@ export function isBillPageNow(url: string = ""): boolean {
   isBillPage.set(isBillDetailOrSettings);
   if (!isBillDetailOrSettings) {
     currentBill.set(undefined);
-  } else {
-    let id = page.url.searchParams.get("id");
-    if (id) {
-      let bill = billStore.getBillById(id);
-      if (bill) {
-        if (bill.items.length === 0) {
-          //尝试从服务器获取items
-          bill.getItemFromServer();
-        }
-      }
-      currentBill.set(bill);
-    }
   }
   return isBillDetailOrSettings;
 }

@@ -5,12 +5,13 @@
   import { Input } from "$lib/components/ui/input/index.js";
   import { Plus } from "lucide-svelte";
   import { showAlert } from "$lib/stores/alert-dialog-store";
-  import { billStore } from "$lib/stores/bill-store";
+  import { billStore, currentBill } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill";
   import { saveBillLocal, saveUserLocal } from "$lib/stores/data-store";
   import { NavigateTo } from "$lib/utils/navigating";
   import { currentUser } from "$lib/stores/user-store";
   import type { User } from "$lib/models/user";
+  import { BillMember } from "$lib/models/bill-member";
 
   let title = $state("");
   let user: User | null = $state(null);
@@ -20,6 +21,7 @@
   async function addBill() {
     if (!user) {
       showAlert("错误", "用户信息获取失败.");
+      NavigateTo("/user/login");
       return;
     }
     if (title.length < 3) {
@@ -30,19 +32,21 @@
     const newBill = new Bill(
       title,
       user,
-      [user],
+      [new BillMember(user.username, user)], // 使用 BillMember 替代 User
       [],
       new Date().toISOString(),
       new Date().toISOString()
     );
 
     await newBill.createToServer();
+    console.log("上传账单成功:", newBill);
     await saveUserLocal(user);
     await saveBillLocal(newBill);
 
     console.log("新账单已添加:", newBill);
     billStore.addBill(newBill);
-
+    
+    currentBill.set(newBill);
     NavigateTo(`/bill/detail?id=${newBill.id}`);
   }
 </script>

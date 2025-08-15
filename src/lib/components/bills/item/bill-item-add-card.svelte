@@ -15,6 +15,7 @@
   import { currentBill } from "$lib/stores/bill-store";
   import { BillItem } from "$lib/models/bill-item";
   import { showAlert } from "$lib/stores/alert-dialog-store";
+  import type { BillMember } from "$lib/models/bill-member";
 
   let {
     title,
@@ -78,20 +79,19 @@
   let triggerRef = $state<HTMLButtonElement>(null!);
 
   let selectedUser = $derived(() => {
-    return (bill.members as User[]).find(
-      (f) => f.username === selectedUserName
+    return (bill.members as BillMember[]).find(
+      (f) => f.name === selectedUserName
     );
   });
   const selectedValue = $derived(
-    (bill.members as User[]).find((f) => f.username === selectedUserName)
-      ?.username
+    (bill.members as BillMember[]).find((f) => f.name === selectedUserName)
+      ?.name
   );
   const id = Math.trunc(Math.random() * Number.MAX_SAFE_INTEGER).toString();
   $effect(() => {
   });
 
   function closeAndFocusTrigger() {
-    open = false;
     tick().then(() => {
       triggerRef.focus();
     });
@@ -207,19 +207,19 @@
               <Command.Group value="members">
                 {#each bill.members as memberItem (memberItem.id)}
                   <Command.Item
-                    value={memberItem.username}
+                    value={memberItem.name}
                     onSelect={() => {
-                      selectedUserName = memberItem.username;
+                      selectedUserName = memberItem.name;
                       closeAndFocusTrigger();
                     }}
                   >
                     <CheckIcon
                       class={cn(
-                        selectedUserName !== memberItem.username &&
+                        selectedUserName !== memberItem.name &&
                           "text-transparent"
                       )}
                     />
-                    {memberItem.username}
+                    {memberItem.name}
                   </Command.Item>
                 {/each}
               </Command.Group>

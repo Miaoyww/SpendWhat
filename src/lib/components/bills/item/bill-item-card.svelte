@@ -21,9 +21,10 @@
   import { cn } from "$lib/utils";
   import { Bill } from "$lib/models/bill";
   import * as Select from "$lib/components/ui/select/index.js";
+  import BillMemberCard from "../bill-member.card.svelte";
+  import type { BillMember } from "$lib/models/bill-member";
 
   const { item } = $props<{ item: BillItem }>();
-
   // 限制的 emoji 列表
   let allowedEmojis = [
     {
@@ -73,21 +74,24 @@
   let occurred_time = $state(
     (item.occurred_time as Date).toLocaleString("sv-SE")
   );
-  let selectedUserName = $state(item.created_by.username);
+
+  let selectedUserName = $state(item.created_by.name);
 
   let editOpen = $state(false);
   let open = $state(false);
-  let value = $state(item.created_by.username);
+  let value = $state(item.created_by.name);
+
   let triggerRef = $state<HTMLButtonElement>(null!);
+    
   const selectedValue = $derived(
-    (item.bill.members as User[]).find((f) => f.username === value)?.username
+    (item.bill.members as BillMember[]).find((f) => f.name === value)?.name
   );
 
   async function saveEdit() {
     try {
       editOpen = false;
-      let created_by = (item.bill.members as User[]).find(
-        (m) => m.username === selectedUserName
+      let created_by = (item.bill.members as BillMember[]).find(
+        (m) => m.name === selectedUserName
       );
       if (!created_by) {
         showAlert("错误", "未选择支付方");
@@ -115,13 +119,13 @@
   }
 
   async function deleteItem() {
+    editOpen = false;
     item.bill.removeItem(item);
     currentBill.set(item.bill);
     return;
   }
 
   function closeAndFocusTrigger() {
-    open = false;
     tick().then(() => {
       triggerRef.focus();
     });
@@ -144,7 +148,7 @@
     <div>
       <div class="font-medium text-sm">{item.description}</div>
       <div class="text-xs text-muted-foreground">
-        由{item.created_by.username}支付
+        由{item.created_by.name}支付
       </div>
     </div>
   </div>
@@ -227,18 +231,18 @@
               <Command.Group value="members">
                 {#each item.bill.members as memberItem (memberItem.id)}
                   <Command.Item
-                    value={memberItem.username}
+                    value={memberItem.name}
                     onSelect={() => {
-                      value = memberItem.username;
+                      value = memberItem.name;
                       closeAndFocusTrigger();
                     }}
                   >
                     <CheckIcon
                       class={cn(
-                        value !== memberItem.username && "text-transparent"
+                        value !== memberItem.name && "text-transparent"
                       )}
                     />
-                    {memberItem.username}
+                    {memberItem.name}
                   </Command.Item>
                 {/each}
               </Command.Group>
@@ -258,10 +262,7 @@
           editOpen = false;
         }}>取消</Button
       >
-      <Button
-        variant="destructive"
-        onclick={deleteItem}>删除</Button
-      >
+      <Button variant="destructive" onclick={deleteItem}>删除</Button>
       <Button onclick={saveEdit}>保存</Button>
     </DialogFooter>
   </DialogContent>

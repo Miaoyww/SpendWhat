@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.spendwhat.app",
   "build": {
-    "frontendDist": "../src",
+    "frontendDist": "../src/",
     "devUrl": "http://localhost:5173",
     "beforeDevCommand": "pnpm run dev",
     "beforeBuildCommand": "pnpm build"

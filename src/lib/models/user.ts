@@ -2,7 +2,7 @@ import type { Bill } from "$lib/models/bill";
 import api from "$lib/utils/request";
 
 export class User {
-  id?: string;
+  id: string;
   username: string;
   created_time?: Date;
   created_bills?: Bill[]; // 创建的账单

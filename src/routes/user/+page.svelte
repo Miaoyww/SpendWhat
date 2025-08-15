@@ -2,9 +2,21 @@
   import { goto } from "$app/navigation";
   import { Button } from "$lib/components/ui/button/index.js";
   import { showAlert } from "$lib/stores/alert-dialog-store";
-  import { logoutUser } from "$lib/stores/user-store";
+  import { currentUser, loginByCookie, logoutUser } from "$lib/stores/user-store";
+  import { NavigateTo } from "$lib/utils/navigating";
+  import { onMount } from "svelte";
   export let data: { session: string };
-
+  
+  
+  onMount(async ()=>{
+     let user = await loginByCookie(data.session);
+     currentUser.set(user);
+     if(!user){
+      NavigateTo("/user/login");
+     }
+      
+  
+  });
   function logout(){
     logoutUser();
     goto("/user/login");

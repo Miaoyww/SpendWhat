@@ -90,25 +90,22 @@
     </DialogFooter>
   </DialogContent>
 </Dialog>
+
 <Sidebar.MenuButton
+  id={billItem.id}
   class={cn(
-    "flex justify-between items-center flex-1 text-left group/item h-10 mt-2 rounded-xl cursor-pointer",
+    "flex justify-between outline outline-offset-2 p-0 items-center flex-1 text-left group/item h-10 mt-2 rounded-xl cursor-pointer",
     className
   )}
+  onclick={() => {
+    currentBill.set(billItem);
+    NavigateTo(`/bill/detail?id=${billItem.id}`);
+  }}
 >
-  <Button
-    class="outline outline-offset-2 p-0"
-    onclick={() => {
-      NavigateTo(`/bill/detail?id=${billItem.id}`);
-      currentBill.set(billItem);
-    }}
-    variant="ghost"
+  <span
+    class="ml-2 text-[14px] text-left line-clamp-1 max-w-[12rem] text-pretty"
+    >{title}</span
   >
-    <span
-      class="ml-1 text-[14px] text-left line-clamp-1 max-w-[12rem] text-pretty"
-      >{title}</span
-    >
-  </Button>
 
   <DropdownMenu.Root>
     <DropdownMenu.Trigger

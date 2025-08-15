@@ -5,11 +5,9 @@ import { User } from "$lib/models/user";
 import {
   saveUserLocal,
   getBillsByUserId,
-  deleteUserLocal,
 } from "$lib/stores/data-store";
 import { billStore, getCurrentUserBillsFromServer } from "./bill-store";
 import api from "$lib/utils/request";
-import type { Bill } from "$lib/models/bill/bill";
 
 const API_URL = "http://localhost:3000/api/user/";
 
@@ -36,8 +34,6 @@ export async function getCurrentUser(): Promise<User | null> {
         if (!bills) {
           bills = await getBillsByUserId(user.id);
         }
-
-
         billStore.clear();
         billStore.addBillList(bills);
       }

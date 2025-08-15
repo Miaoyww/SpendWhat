@@ -6,57 +6,34 @@
   import { Bill } from "$lib/models/bill";
   import { BillItem } from "$lib/models/bill-item";
   import { User } from "$lib/models/user";
-  import { billStore, currentBill } from "$lib/stores/bill-store";
-  import { currentUser } from "$lib/stores/user-store";
+  import { currentBill } from "$lib/stores/bill-store";
   import { Menu, Plus } from "lucide-svelte";
-  import { onMount } from "svelte";
   import * as Card from "$lib/components/ui/card/index.js";
   import { Label } from "$lib/components/ui/label";
-
-  let bill: Bill | undefined = $state();
-  let id: string | null = $state(null);
+  import { NavigateTo } from "$lib/utils/navigating";
 
   let showAddDialog = $state(false);
-
   let sortedBillItems = $state<BillItem[]>([]);
 
   currentBill.subscribe((value) => {
-    if (value) {
-      sortItems(value.items);
-    }
+    console.log("Current bill changed:", value);
+    sortedBillItems = [];
+    fetchBill();
   });
 
-  $effect(() => {
-    id = page.url.searchParams.get("id");
-    if (id) {
-      bill = billStore.getBillById(id);
-      if (bill) {
-        if (bill.items.length === 0) {
-          //尝试从服务器获取items
-          bill.getItemFromServer();
-        }
-      }
-      currentBill.set(bill);
-    }
-  });
-
-  onMount(() => {
-    if ($currentBill?.items) {
+  async function fetchBill() {
+    if ($currentBill) {
+      await $currentBill.getItemFromServer();
       sortItems($currentBill.items);
     }
-  });
+  }
 
   function sortItems(value: BillItem[]) {
-    if (value) {
-      sortedBillItems = value.sort((a, b) => {
-        return (
-          new Date(b.created_time).getTime() -
-          new Date(a.created_time).getTime()
-        );
-      });
-    } else {
-      sortedBillItems = [];
-    }
+    sortedBillItems = value.sort((a, b) => {
+      return (
+        new Date(b.created_time).getTime() - new Date(a.created_time).getTime()
+      );
+    });
   }
 </script>
 
@@ -104,11 +81,19 @@
           <!-- 左边文字 -->
           <div class="flex flex-col">
             <Label class="text-base font-bold">成员管理</Label>
-            <Label class="text-sm">当前 N 名成员</Label>
+            <Label class="text-sm"
+              >当前 {$currentBill!.members.length} 名成员</Label
+            >
           </div>
 
           <!-- 右边图标按钮 -->
-          <Button variant="ghost" class="mr-3">
+          <Button
+            variant="ghost"
+            class="mr-3"
+            onclick={() => {
+              NavigateTo(`/bill/member?id=${$currentBill!.id}`);
+            }}
+          >
             <Menu size={36} />
           </Button>
         </div>
@@ -139,4 +124,8 @@
   <Plus size={36} />
 </Button>
 
-<BillItemAddCard title="添加新账单" bind:open={showAddDialog} {bill} />
+<BillItemAddCard
+  title="添加新账单"
+  bind:open={showAddDialog}
+  bill={$currentBill}
+/>

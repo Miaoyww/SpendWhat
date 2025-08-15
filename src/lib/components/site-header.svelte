@@ -64,6 +64,11 @@
               variant="ghost"
               size="sm"
               class="sm:flex outline outline-offset-2"
+              onclick={() => {
+                if (currentBill) {
+                  NavigateTo(`/bill/share?id=${_currentBill?.id}`);
+                }
+              }}
             >
               <SquareArrowOutUpRight />
             </Button>
