@@ -36,6 +36,7 @@
       className = value.id === billItem.id ? "bg-gray-200" : "";
     }
   });
+  
   currentUser.subscribe((value) => {
     user = value;
   });
