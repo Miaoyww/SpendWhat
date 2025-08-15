@@ -7,6 +7,7 @@
   import { loginUser } from "$lib/stores/user-store";
   import { showAlert } from "$lib/stores/alert-dialog-store";
   import { NavigateTo } from "$lib/utils/navigating";
+  import { sha256 } from "js-sha256";
 
   const API_URL = "http://localhost:3000/api/user/login";
 
@@ -16,10 +17,6 @@
   const id = $props.id();
 
   async function login() {
-    const data = {
-      username: $state.snapshot(userName),
-      password: $state.snapshot(password),
-    };
     if (!userName || !password) {
       showAlert("错误", "用户名和密码不能为空");
       return;
@@ -29,7 +26,10 @@
       showAlert("错误", "用户名长度不能小于3个字符");
       return;
     }
-    let isLoggedIn = await loginUser($state.snapshot(userName), $state.snapshot(password));
+    let isLoggedIn = await loginUser(
+      $state.snapshot(userName),
+      $state.snapshot(sha256(password))
+    );
     if (isLoggedIn) {
       // 登录成功，跳转到首页
       NavigateTo("/user");

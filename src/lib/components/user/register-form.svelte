@@ -6,6 +6,7 @@
   import { showAlert } from "$lib/stores/alert-dialog-store";
   import { loginUser, registerUser } from "$lib/stores/user-store";
   import { NavigateTo } from "$lib/utils/navigating";
+  import { sha256 } from "js-sha256";
 
   let userName = $state("");
   let password = $state("");
@@ -24,11 +25,11 @@
     }
     let isRegistered = await registerUser(
       $state.snapshot(userName),
-      $state.snapshot(password)
+      $state.snapshot(sha256(password))
     );
 
     if (isRegistered) {
-      await loginUser($state.snapshot(userName), $state.snapshot(password));
+      await loginUser($state.snapshot(userName), $state.snapshot(sha256(password)));
       // 注册成功，跳转到用户主页
       NavigateTo("/user/");
     }
