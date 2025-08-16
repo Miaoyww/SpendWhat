@@ -1,11 +1,8 @@
 <script lang="ts">
-  import { page } from "$app/state";
   import BillItemAddCard from "$lib/components/bills/item/bill-item-add-card.svelte";
   import BillItemCard from "$lib/components/bills/item/bill-item-card.svelte";
   import { Button } from "$lib/components/ui/button";
-  import { Bill } from "$lib/models/bill";
   import { BillItem } from "$lib/models/bill-item";
-  import { User } from "$lib/models/user";
   import { currentBill } from "$lib/stores/bill-store";
   import { Menu, Plus } from "lucide-svelte";
   import * as Card from "$lib/components/ui/card/index.js";
@@ -16,22 +13,17 @@
   let sortedBillItems = $state<BillItem[]>([]);
 
   currentBill.subscribe((value) => {
+    if (!value) return;
     console.log("Current bill changed:", value);
-    sortedBillItems = [];
-    fetchBill();
+    sortItems(value.items);
   });
 
-  async function fetchBill() {
-    if ($currentBill) {
-      await $currentBill.getItemFromServer();
-      sortItems($currentBill.items);
-    }
-  }
-
   function sortItems(value: BillItem[]) {
+    if(!value) return;
+    sortedBillItems = [];
     sortedBillItems = value.sort((a, b) => {
       return (
-        new Date(b.created_time).getTime() - new Date(a.created_time).getTime()
+        new Date(b.occurred_time).getTime() - new Date(a.occurred_time).getTime()
       );
     });
   }

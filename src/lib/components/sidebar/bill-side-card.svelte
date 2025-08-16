@@ -12,8 +12,6 @@
     DialogHeader,
     DialogTitle,
   } from "$lib/components/ui/dialog/index.js";
-  import { currentUser } from "$lib/stores/user-store";
-  import { User } from "$lib/models/user";
   import { billStore, currentBill } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill";
   import { NavigateTo } from "$lib/utils/navigating";
@@ -24,7 +22,6 @@
   const props = $props<{ billItem: Bill }>();
   const { billItem } = props;
 
-  let user: User | null = $state(null);
   let isRenaming = $state(false);
   let isSharing = $state(false);
 
@@ -37,9 +34,7 @@
     }
   });
   
-  currentUser.subscribe((value) => {
-    user = value;
-  });
+
 </script>
 
 <Dialog bind:open={isRenaming}>
@@ -98,8 +93,9 @@
     "flex justify-between outline outline-offset-2 p-0 items-center flex-1 text-left group/item h-10 mt-2 rounded-xl cursor-pointer",
     className
   )}
-  onclick={() => {
+  onclick={async () => {
     currentBill.set(billItem);
+    await $currentBill?.getItemFromServer();
     NavigateTo(`/bill/detail?id=${billItem.id}`);
   }}
 >

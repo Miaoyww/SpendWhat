@@ -12,7 +12,7 @@
   import { tick } from "svelte";
   import { cn } from "$lib/utils";
   import type { Bill } from "$lib/models/bill";
-  import { currentBill } from "$lib/stores/bill-store";
+  import { billStore, currentBill } from "$lib/stores/bill-store";
   import { BillItem } from "$lib/models/bill-item";
   import { showAlert } from "$lib/stores/alert-dialog-store";
   import type { BillMember } from "$lib/models/bill-member";
@@ -129,13 +129,10 @@
       new Date(occurred_time)
     );
     await newItem.createToServer();
-    bill?.addItem(newItem);
+    await $currentBill?.addItem(newItem);
+    billStore.updateCurrentBill();
     open = false;
-    currentBill.set(bill);
   }
-  function openAddBillDialog() {}
-
-  async function handleAdd() {}
 </script>
 
 <Dialog.Root {open} onOpenChange={(v) => (open = v)}>

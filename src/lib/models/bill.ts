@@ -62,7 +62,6 @@ export class Bill {
     //   console.error("上传账单失败:", error);
     // }
   }
-
   async getItemFromServer() {
     if (!this.id) {
       return;
@@ -77,7 +76,6 @@ export class Bill {
       const response = await api.post(`/bill/item/list`, data);
 
       response.data.forEach((item: any) => {
-
         //如果id有重则不新建
         if (!this.items.find((i) => i.id === item._id)) {
           const billItem = new BillItem(
@@ -159,7 +157,7 @@ export function mapResponseToBills(
   return responseData.map((item) => {
     console.log("映射账单数据:", item);
     const members: BillMember[] = [];
-    item.members.forEach(m => {
+    item.members.forEach((m) => {
       members.push(new BillMember(m.name, m._id));
     });
 

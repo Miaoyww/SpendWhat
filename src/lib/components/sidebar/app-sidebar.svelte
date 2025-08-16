@@ -12,7 +12,7 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import { currentUser } from "$lib/stores/user-store";
   import { billStore } from "$lib/stores/bill-store";
-  import BillSideCard from "$lib/components/bills/bill-side-card.svelte";
+  import BillSideCard from "$lib/components/sidebar/bill-side-card.svelte";
   import { NavigateTo } from "$lib/utils/navigating";
   import * as SearchDialog from "$lib/components/dialog/search-dialog/dialog/index.js";
   import { searchDialog, showSearchDialog } from "$lib/stores/search-dialog-store";

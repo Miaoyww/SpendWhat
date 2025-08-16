@@ -1,10 +1,15 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button/index.js";
   import { Separator } from "$lib/components/ui/separator/index.js";
-  import { Plus, Settings, SquareArrowOutUpRight } from "lucide-svelte";
+  import {
+    Plus,
+    Settings,
+    SquareArrowOutUpRight,
+    RefreshCcw,
+  } from "lucide-svelte";
   import SidebarTrigger from "$lib/components/ui/sidebar/sidebar-trigger.svelte";
   import { NavigateTo, isBillPage } from "$lib/utils/navigating";
-  import { currentBill } from "$lib/stores/bill-store";
+  import { billStore, currentBill } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill";
   let isBillNow: boolean = $state(false);
 
@@ -36,7 +41,7 @@
       onclick={() => {
         if (isBillNow) {
           NavigateTo(`/bill/detail?id=${_currentBill?.id}`);
-        }else {
+        } else {
           NavigateTo("/");
         }
       }}
@@ -51,7 +56,23 @@
     </Button>
 
     <div class="ml-auto flex items-center gap-2">
-      <div class="grid grid-cols-3 gap-4">
+      <div class="grid grid-cols-4 gap-4">
+        <div class="...">
+          {#if isBillNow}
+            <Button
+              variant="ghost"
+              size="sm"
+              class="sm:flex outline outline-offset-2"
+              onclick={() => {
+                if (currentBill) {
+                  billStore.refreshBill();
+                }
+              }}
+            >
+              <RefreshCcw />
+            </Button>
+          {/if}
+        </div>
         <div class="...">
           {#if isBillNow}
             <Button

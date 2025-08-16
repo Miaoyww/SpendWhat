@@ -12,7 +12,6 @@ import api from "$lib/utils/request";
 import type { User } from "$lib/models/user";
 import { showAlert } from "./alert-dialog-store";
 import { NavigateTo } from "$lib/utils/navigating";
-import { BillMember } from "$lib/models/bill-member";
 
 // 定义 billStore 来存储所有账单
 const billsStore = writable<Bill[]>([]);
@@ -113,7 +112,6 @@ function addBillItem(billId: string, newItem: BillItem) {
     return [...bills];
   });
   sortBillByTime();
-
 }
 
 // 移除账单项
@@ -128,6 +126,24 @@ function removeBillItem(billId: string, itemId: string) {
   });
   sortBillByTime();
 }
+function updateCurrentBill(bill?: Bill) {
+  if(bill){
+    currentBill.set(bill);
+    return;
+  }
+
+  currentBill.update((current) => {
+    if (current) {
+      current.items = [...current.items];
+    }
+    return current;
+  });
+}
+
+async function refreshBill(){
+  await getCurrentUserBillsFromServer();
+  await _currentBill?.getItemFromServer();
+}
 
 export const billStore = {
   subscribe: billsStore.subscribe,
@@ -140,6 +156,8 @@ export const billStore = {
   removeBillItem,
   clear,
   sortBillByTime,
+  updateCurrentBill,
+  refreshBill,
 };
 
 export function getCurrentUserBillsFromServer(): Bill[] {
