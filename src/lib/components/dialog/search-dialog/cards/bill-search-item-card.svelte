@@ -9,6 +9,7 @@
     showSearchDialog,
     hideSearchDialog
   } from "$lib/stores/search-dialog-store";
+  import { currentBill } from "$lib/stores/bill-store";
 
   let { bill } = $props();
 </script>
@@ -23,6 +24,7 @@
   )}
   onclick={() => {
     hideSearchDialog();
+    currentBill.set(bill);
     NavigateTo(`/bill/detail?id=${bill.id}`);
   }}
 >

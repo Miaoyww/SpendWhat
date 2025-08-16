@@ -10,6 +10,8 @@
   import { billStore } from "$lib/stores/bill-store.js";
   import { ReceiptText } from "lucide-svelte";
   import BillSearchItemCard from "../cards/bill-search-item-card.svelte";
+  import { Label } from "$lib/components/ui/label/index.js";
+  import Fuse from "fuse.js";
 
   let {
     ref = $bindable(null),
@@ -24,26 +26,20 @@
     showCloseButton?: boolean;
   } = $props();
 
-  let items: Bill[] = $state([]);
   let searchContent = $state("");
   let filteredItems: Bill[] = $state([]);
 
-  billStore.subscribe((value) => {
-    //按照时间顺序排列
-    items = value
-      .slice()
-      .sort(
-        (a, b) =>
-          new Date(b.created_time).getTime() -
-          new Date(a.created_time).getTime()
-      );
-  });
-  1;
+  let fuse: Fuse<Bill>;
   $effect(() => {
-    filteredItems = items.filter((item: Bill) =>
-      item.title.includes(searchContent)
-    );
+    if ($billStore.length > 0) {
+      fuse = new Fuse($billStore, {
+        keys: ["title"], // 搜索的字段
+        threshold: 0.4, // 模糊匹配程度 (0.0 精确匹配 ~ 1.0 非常模糊)
+      });
+    }
+    filteredItems = fuse.search(searchContent).map((result) => result.item);
   });
+
 </script>
 
 <Dialog.Portal {...portalProps}>
@@ -59,7 +55,11 @@
   >
     <!-- Input + 内置 Close 按钮 -->
     <div class="relative w-full mb-5">
-      <Input class="w-full pr-10" placeholder="搜索账单..." />
+      <Input
+        class="w-full pr-10"
+        placeholder="搜索账单..."
+        bind:value={searchContent}
+      />
       {#if showCloseButton}
         <DialogPrimitive.Close
           class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 opacity-70 hover:opacity-100"
@@ -76,12 +76,14 @@
             <BillSearchItemCard bill={item} />
           {/each}
         {:else}
-          <li class="p-2 text-gray-500">没有找到结果</li>
+          <Label class="p-2 text-gray-500 text-base mt-2">暂无记录</Label>
         {/if}
-      {:else}
-        {#each items as item}
+      {:else if $billStore.length > 0}
+        {#each $billStore as item}
           <BillSearchItemCard bill={item} />
         {/each}
+      {:else}
+        <Label class="p-2 text-gray-500 text-base mt-2">暂无记录</Label>
       {/if}
     </div>
   </DialogPrimitive.Content>

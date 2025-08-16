@@ -121,7 +121,7 @@
     console.log(showAddDialog);
   }}
 >
-  <Plus size={36} />
+  <Plus size={24} />
 </Button>
 
 <BillItemAddCard

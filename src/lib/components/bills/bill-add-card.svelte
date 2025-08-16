@@ -32,7 +32,7 @@
     const newBill = new Bill(
       title,
       user,
-      [new BillMember(user.username, user)], // 使用 BillMember 替代 User
+      [],
       [],
       new Date().toISOString(),
       new Date().toISOString()

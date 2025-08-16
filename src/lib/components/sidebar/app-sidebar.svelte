@@ -14,21 +14,9 @@
   import { billStore } from "$lib/stores/bill-store";
   import BillSideCard from "$lib/components/bills/bill-side-card.svelte";
   import { NavigateTo } from "$lib/utils/navigating";
-  import type { Bill } from "$lib/models/bill";
   import * as SearchDialog from "$lib/components/dialog/search-dialog/dialog/index.js";
   import { searchDialog, showSearchDialog } from "$lib/stores/search-dialog-store";
 
-  let items: Bill[] = $state([]);
-  billStore.subscribe((value) => {
-    //按照时间顺序排列
-    items = value
-      .slice()
-      .sort(
-        (a, b) =>
-          new Date(b.created_time).getTime() -
-          new Date(a.created_time).getTime()
-      );
-  });
 </script>
 
 <SearchDialog.Root bind:open={$searchDialog!.open}>
@@ -92,7 +80,7 @@
             >
 
             {#if $currentUser}
-              {#each items as item (item.id)}
+              {#each $billStore! as item (item.id)}
                 <BillSideCard billItem={item} />
               {/each}
             {/if}

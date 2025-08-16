@@ -30,7 +30,17 @@
       orientation="vertical"
       class="mx-2 data-[orientation=vertical]:h-4"
     />
-    <h1 class="text-base font-medium">
+    <Button
+      variant="ghost"
+      class="text-base font-medium"
+      onclick={() => {
+        if (isBillNow) {
+          NavigateTo(`/bill/detail?id=${_currentBill?.id}`);
+        }else {
+          NavigateTo("/");
+        }
+      }}
+    >
       {#if isBillNow}
         {#if currentBill}
           {$currentBill?.title}
@@ -38,7 +48,7 @@
       {:else}
         SpendWhat
       {/if}
-    </h1>
+    </Button>
 
     <div class="ml-auto flex items-center gap-2">
       <div class="grid grid-cols-3 gap-4">

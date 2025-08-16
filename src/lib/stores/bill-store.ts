@@ -23,6 +23,18 @@ currentBill.subscribe((value) => {
   _currentBill = value;
 });
 
+function sortBillByTime() {
+  billsStore.update((bills) => {
+    return bills
+      .slice()
+      .sort(
+        (a, b) =>
+          new Date(b.item_updated_time).getTime() -
+          new Date(a.item_updated_time).getTime()
+      );
+  });
+}
+
 // 获取单个账单
 function getBillById(id: string): Bill | undefined {
   let bills: Bill[] = [];
@@ -34,11 +46,14 @@ function getBillById(id: string): Bill | undefined {
 function addBill(newBill: Bill) {
   billsStore.update((bills) => [...bills, newBill]);
   saveBillLocal(newBill);
+
+  sortBillByTime();
 }
 
 function addBillList(newBill: Bill[]) {
   //通过调用addBill添加
   newBill.forEach(addBill);
+  sortBillByTime();
 }
 
 // 删除账单
@@ -60,6 +75,8 @@ function removeBill(id: string) {
   }
   console.log("删除账单:", id);
   deleteBillLocal(id);
+
+  sortBillByTime();
 }
 
 // 清除账单
@@ -83,6 +100,7 @@ function updateBill(updatedBill: Bill) {
     updateBillToServer(updatedBill);
     return [...bills];
   });
+  sortBillByTime();
 }
 
 // 添加账单项
@@ -94,6 +112,8 @@ function addBillItem(billId: string, newItem: BillItem) {
     }
     return [...bills];
   });
+  sortBillByTime();
+
 }
 
 // 移除账单项
@@ -106,6 +126,7 @@ function removeBillItem(billId: string, itemId: string) {
 
     return [...bills];
   });
+  sortBillByTime();
 }
 
 export const billStore = {
@@ -118,6 +139,7 @@ export const billStore = {
   addBillItem,
   removeBillItem,
   clear,
+  sortBillByTime,
 };
 
 export function getCurrentUserBillsFromServer(): Bill[] {
