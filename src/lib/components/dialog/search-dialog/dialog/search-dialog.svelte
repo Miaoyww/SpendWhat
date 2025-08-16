@@ -36,10 +36,11 @@
         keys: ["title"], // 搜索的字段
         threshold: 0.4, // 模糊匹配程度 (0.0 精确匹配 ~ 1.0 非常模糊)
       });
+      if (fuse) {
+        filteredItems = fuse.search(searchContent).map((result) => result.item);
+      }
     }
-    filteredItems = fuse.search(searchContent).map((result) => result.item);
   });
-
 </script>
 
 <Dialog.Portal {...portalProps}>
