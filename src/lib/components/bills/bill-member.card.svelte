@@ -5,10 +5,16 @@
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import api from "$lib/utils/request";
   import { currentBill } from "$lib/stores/bill-store";
+  import { currentUser } from "$lib/stores/user-store";
   import { showAlert } from "$lib/stores/alert-dialog-store";
   import { Bill } from "$lib/models/bill";
   import ShareCard from "../dialog/share-card/share-card.svelte";
   import * as Avatar from "$lib/components/ui/avatar/index.js";
+  import { Label } from "../ui/label";
+  import { Input } from "../ui/input";
+  import * as Select from "$lib/components/ui/select/index.js";
+  import { BillRole } from "$lib/enum/roles";
+  import { toast } from "svelte-sonner";
 
   let { member = $bindable<BillMember>(), bill = $bindable<Bill>() } = $props<{
     member: BillMember;
@@ -17,26 +23,45 @@
 
   let editCardOpen = $state(false);
   let shareCardOpen = $state(false);
+  let bindCardOpen = $state(false);
+  let roleOptions = [
+    { value: "owner", label: "拥有者" },
+    { value: "member", label: "成员" },
+    { value: "observer", label: "游客" },
+  ];
 
-  function startEdit() {
-    //   if (!$currentBill) {
-    //     return;
-    //   }
-    //   editIndex = index;
-    //   editName = $currentBill.members[index].name;
-    //   editUserId = $currentBill.members[index].id || "";
-  }
+  let roleSelected = $state("observer");
+  const roleTriggerContent = $derived(
+    roleOptions.find((f) => f.value === roleSelected)?.label ?? "选择权限"
+  );
 
-  function saveEdit() {
-    //   if (!$currentBill) {
-    //     return;
-    //   }
-    //   if (editIndex === null) return;
-    //   $currentBill.members[editIndex].name = editName;
-    //   $currentBill.members[editIndex].id = editUserId;
-    //   saveBill();
-    //   editIndex = null;
-  }
+  let currentUserRole = $derived(() => {
+    if (bill.owner?.id === $currentUser!.id) {
+      return BillRole.Owner;
+    }
+
+    const member = (bill.members as BillMember[]).find(
+      (m) => m.user?.id === $currentUser!.id
+    );
+    if (member) {
+      return member.role || BillRole.Observer;
+    }
+
+    return BillRole.Observer;
+  });
+
+  let editAble = $derived(
+    member.user?.id === $currentUser?.id || currentUserRole() === BillRole.Owner
+  );
+  let bindAble = $derived(() => {
+    if (member.user) {
+      return false;
+    }
+    // 遍历整个members, 如果有成员的linked_user是自己,则否
+    return !$currentBill?.members.some((m) => m.user?.id === $currentUser?.id);
+  });
+
+  function saveEdit() {}
 
   function removeMember() {
     let data = {
@@ -60,19 +85,27 @@
       });
   }
 
-  let roleOptions = [
-    { value: "owner", label: "拥有者" },
-    { value: "member", label: "成员" },
-    { value: "observer", label: "游客" },
-  ];
-
-  let roleSelected = $state("observer");
-  const roleTriggerContent = $derived(
-    roleOptions.find((f) => f.value === roleSelected)?.label ?? "选择权限"
-  );
+  function bindMember() {
+    bindCardOpen = false;
+    api
+      .post("/bill/member/bind", {
+        bill_id: $currentBill?.id,
+        bill_member_id: member.id,
+        user_id: $currentUser?.id,
+      })
+      .then(() => {
+        member.bind($currentUser);
+        toast.success("成员绑定成功");
+      })
+      .catch((error) => {
+        showAlert("错误", error.message || "网络错误");
+      });
+  }
 </script>
 
-<div class="flex items-center justify-between p-3 rounded-lg shadow-sm hover:shadow-md bg-white">
+<div
+  class="flex items-center justify-between p-3 rounded-lg shadow-sm hover:shadow-md bg-white"
+>
   <div class="flex items-center gap-3">
     <Avatar.Root>
       <Avatar.Fallback>{member.name.charAt(0)}</Avatar.Fallback>
@@ -82,22 +115,35 @@
 
   <div class="flex items-center gap-3">
     <div class="text-right">
-      {#if !member.user}
+      {#if bindAble()}
         <Button
           variant="ghost"
           onclick={() => {
-            shareCardOpen = true;
-          }}>邀请</Button
+            bindCardOpen = true;
+          }}>绑定</Button
         >
       {/if}
-      <Button
-        variant="ghost"
-        onclick={() => {
-          editCardOpen = true;
-        }}
-      >
-        <ChevronRight />
-      </Button>
+      {#if currentUserRole() === BillRole.Owner}
+        {#if !member.user}
+          <Button
+            variant="ghost"
+            onclick={() => {
+              shareCardOpen = true;
+            }}>邀请</Button
+          >
+        {/if}
+      {/if}
+
+      {#if editAble}
+        <Button
+          variant="ghost"
+          onclick={() => {
+            editCardOpen = true;
+          }}
+        >
+          <ChevronRight />
+        </Button>
+      {/if}
     </div>
   </div>
 </div>
@@ -106,12 +152,43 @@
   <Dialog.Content class="max-w-md">
     <Dialog.Header>
       <Dialog.Title>成员详情</Dialog.Title>
+      <Dialog.Description>编辑成员信息</Dialog.Description>
     </Dialog.Header>
+    <div class="grid gap-2">
+      <Label class="mt-1">昵称</Label>
+      <Input type="text" bind:value={member.name} />
+      {#if member.user}
+        <Label class="mt-1">权限</Label>
+        <Select.Root
+          type="single"
+          name="favoriteFruit"
+          bind:value={roleSelected}
+        >
+          <Select.Trigger class="w-[180px]">
+            {roleTriggerContent}
+          </Select.Trigger>
+          <Select.Content>
+            <Select.Group>
+              <Select.Label>权限</Select.Label>
+              {#each roleOptions as item (item.value)}
+                <Select.Item
+                  value={item.value}
+                  label={item.label}
+                  disabled={item.value === "grapes"}
+                >
+                  {item.label}
+                </Select.Item>
+              {/each}
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
+      {/if}
+    </div>
     <Dialog.Footer class="flex justify-between">
       <Button variant="ghost" onclick={() => (editCardOpen = false)}
         >取消</Button
       >
-      <Button variant="secondary" onclick={startEdit}>保存</Button>
+      <Button variant="secondary" onclick={saveEdit}>保存</Button>
       <Button variant="destructive" onclick={removeMember}>删除</Button>
     </Dialog.Footer>
   </Dialog.Content>
@@ -123,3 +200,13 @@
   showDetail={false}
   billMember={member}
 />
+
+<Dialog.Root bind:open={bindCardOpen}>
+  <Dialog.Content class="max-w-md">
+    <Dialog.Header>
+      <Dialog.Title>绑定成员</Dialog.Title>
+      <Dialog.Description>将会以{member.name}作为成员</Dialog.Description>
+    </Dialog.Header>
+    <Button variant="outline" onclick={bindMember}>绑定</Button>
+  </Dialog.Content>
+</Dialog.Root>

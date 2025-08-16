@@ -4,6 +4,8 @@ import api from "$lib/utils/request";
 import { showAlert } from "$lib/stores/alert-dialog-store";
 import axios from "axios";
 import { BillMember } from "$lib/models/bill-member";
+import { BillRole } from "$lib/enum/roles";
+import type { BillMemberPublic, UserPublic } from "./ResponseItem/Public";
 
 export class Bill {
   id?: string;
@@ -93,6 +95,50 @@ export class Bill {
           this.items.push(billItem);
         }
       });
+
+      const roleResponse = await api.post("/bill/access/list", {
+        bill_id: this.id,
+      });
+
+      interface UserRole {
+        user_id: string;
+        role: "owner" | "member" | "observer";
+      }
+
+      // 假设 roleResponse.data 是 any[]，先用 map 转成类型安全的 UserRole[]
+      const userRoles: UserRole[] = roleResponse.data.map((u: any) => ({
+        user_id: u.user_id,
+        role: u.role,
+      }));
+
+      const userRoleMap = new Map(
+        userRoles.map((u) => [u.user_id, u] as [string, UserRole])
+      );
+
+      const membersMap = new Map(
+        this.members
+          .filter((m) => m.isBound)
+          .map((m) => [m.user!.id, m] as [string, BillMember])
+      );
+
+      userRoleMap.forEach((userRoleObj, userId) => {
+        const member = membersMap.get(userId);
+        if (member) {
+          switch (userRoleObj.role) {
+            case "owner":
+              member.setRole(BillRole.Owner);
+              break;
+            case "member":
+              member.setRole(BillRole.Member);
+              break;
+            case "observer":
+              member.setRole(BillRole.Observer);
+              break;
+          }
+        }
+      });
+      console.log("获取账单项成功:", this.members);
+      console.log("获取账单项成功:", this);
     } catch (error) {
       showAlert("错误", "获取账单失败.");
       console.error("获取账单失败:", error);
@@ -143,12 +189,30 @@ export class Bill {
 }
 
 export interface BillResponseItem {
-  id: string;
-  title: string;
-  members: any[]; // 后端原始数据中是空数组，假设这里是 User 的简化数据
-  created_time: string;
-  item_updated_time: string;
+    /**
+     * 创建人
+     */
+    created_by: UserPublic;
+    /**
+     * 创建时间
+     */
+    created_time: Date;
+    id: string;
+    /**
+     * 更新时间
+     */
+    item_updated_time: Date;
+    /**
+     * 成员列表
+     */
+    members: BillMemberPublic[];
+    /**
+     * 标题
+     */
+    title: string;
+    [property: string]: any;
 }
+
 
 export function mapResponseToBills(
   responseData: BillResponseItem[],
@@ -160,7 +224,8 @@ export function mapResponseToBills(
     item.members.forEach((m) => {
       let newMember = new BillMember(m.name, m.id);
       let user: User | undefined;
-      if(m.linked_user){
+
+      if (m.linked_user) {
         user = new User(m.linked_user.id, m.linked_user.username);
         newMember.bindUser(user);
       }
@@ -171,11 +236,11 @@ export function mapResponseToBills(
 
     const bill = new Bill(
       item.title,
-      currentUser,
+      new User(item.created_by.id, item.created_by.username),
       members,
       items,
-      item.created_time,
-      item.item_updated_time
+      item.created_time.toLocaleString("sv-SE"),
+      item.item_updated_time.toLocaleString("sv-SE")
     );
     bill.id = item.id;
     return bill;

@@ -165,7 +165,6 @@ export function getCurrentUserBillsFromServer(): Bill[] {
     skip: 0,
     limit: 30,
   };
-
   api.post("/bill/list", data).then((response) => {
     let billsRaw = response.data as BillResponseItem[];
     let user: User | null = null;
