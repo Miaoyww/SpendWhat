@@ -18,23 +18,22 @@
   import { Input } from "$lib/components/ui/input/index.js";
   import { HOST_URL } from "$lib/utils/request";
   import { cn } from "$lib/utils";
+  import ShareCard from "../dialog/share-card/share-card.svelte";
 
-  const props = $props<{ billItem: Bill }>();
-  const { billItem } = props;
+  const props = $props<{ bill: Bill }>();
+  let { bill } = props;
 
   let isRenaming = $state(false);
   let isSharing = $state(false);
 
-  let title: string = $state(billItem.title);
+  let title: string = $state(bill.title);
   let className = $state("");
 
   currentBill.subscribe((value) => {
     if (value) {
-      className = value.id === billItem.id ? "bg-gray-200" : "";
+      className = value.id === bill.id ? "bg-gray-200" : "";
     }
   });
-  
-
 </script>
 
 <Dialog bind:open={isRenaming}>
@@ -45,9 +44,9 @@
       <Input
         bind:value={title}
         oninput={(e) => {
-          billItem.title = (e.target as HTMLInputElement).value;
-          currentBill.set(billItem);
-          console.log("Updated bill title:", billItem.title);
+          bill.title = (e.target as HTMLInputElement).value;
+          currentBill.set(bill);
+          console.log("Updated bill title:", bill.title);
         }}
       />
     </DialogHeader>
@@ -55,7 +54,7 @@
       <Button
         onclick={() => {
           isRenaming = false;
-          billStore.updateBill(billItem);
+          billStore.updateBill(bill);
         }}
         type="submit"
       >
@@ -65,45 +64,24 @@
   </DialogContent>
 </Dialog>
 
-<Dialog bind:open={isSharing}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>分享</DialogTitle>
-      <DialogDescription>分享您的账单给其他人</DialogDescription>
-      <span>
-        {HOST_URL}/share?id={billItem.id}
-      </span>
-    </DialogHeader>
-    <DialogFooter>
-      <Button
-        onclick={() => {
-          isSharing = false;
-        }}
-        type="submit"
-      >
-        确定
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+<ShareCard {bill} bind:open={isSharing} showDetail={true} />
 
 <Sidebar.MenuButton
-  id={billItem.id}
+  id={bill.id}
   class={cn(
     "flex justify-between outline outline-offset-2 p-0 items-center flex-1 text-left group/item h-10 mt-2 rounded-xl cursor-pointer",
     className
   )}
   onclick={async () => {
-    currentBill.set(billItem);
+    currentBill.set(bill);
     await $currentBill?.getItemFromServer();
-    NavigateTo(`/bill/detail?id=${billItem.id}`);
+    NavigateTo(`/bill/detail?id=${bill.id}`);
   }}
 >
   <span
     class="ml-2 text-[14px] text-left line-clamp-1 max-w-[12rem] text-pretty"
     >{title}</span
   >
-
   <DropdownMenu.Root>
     <DropdownMenu.Trigger
       class="group/edit visible md:invisible md:group-hover/item:visible ghost bg-transparent px-2 py-1 text-sm rounded"
@@ -114,7 +92,7 @@
       <DropdownMenu.Group>
         <DropdownMenu.Item
           onclick={() => {
-            NavigateTo(`/bill/share?billId=${billItem.id}`);
+            isSharing = true;
           }}
         >
           <div class="flex justify-between items-center">
@@ -135,10 +113,10 @@
         <DropdownMenu.Separator />
         <DropdownMenu.Item
           onclick={() => {
-            if (!billItem.id) {
+            if (!bill.id) {
               return;
             }
-            billStore.removeBill(billItem.id);
+            billStore.removeBill(bill.id);
           }}
         >
           <div class="flex justify-between items-center">

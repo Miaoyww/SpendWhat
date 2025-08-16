@@ -3,13 +3,13 @@
   import { ChevronRight } from "lucide-svelte";
   import { Button } from "../ui/button";
   import * as Dialog from "$lib/components/ui/dialog/index.js";
-  import { onMount } from "svelte";
   import api from "$lib/utils/request";
-  import { billStore, currentBill } from "$lib/stores/bill-store";
+  import { currentBill } from "$lib/stores/bill-store";
   import { showAlert } from "$lib/stores/alert-dialog-store";
 
   let { member = $bindable<BillMember>() } = $props<{ member: BillMember }>();
   let editCardOpen = $state(false);
+  let shareCardOpen = $state(false);
 
   function startEdit() {
     //   if (!$currentBill) {
@@ -42,7 +42,9 @@
       .then(() => {
         let newBill = $currentBill;
         if (newBill) {
-          newBill.members = $currentBill!.members.filter((m) => m.id !== member.id);
+          newBill.members = $currentBill!.members.filter(
+            (m) => m.id !== member.id
+          );
         }
         currentBill.set(newBill);
       })
@@ -50,6 +52,17 @@
         showAlert("错误", error.message || "网络错误");
       });
   }
+
+  let roleOptions = [
+    { value: "owner", label: "拥有者" },
+    { value: "member", label: "成员" },
+    { value: "observer", label: "游客" },
+  ];
+
+  let roleSelected = $state("observer");
+  const roleTriggerContent = $derived(
+    roleOptions.find((f) => f.value === roleSelected)?.label ?? "选择权限"
+  );
 </script>
 
 <div
@@ -62,7 +75,12 @@
   <div class="flex items-center gap-3">
     <div class="text-right">
       {#if !member.user}
-        <Button variant="ghost">邀请</Button>
+        <Button
+          variant="ghost"
+          onclick={() => {
+            shareCardOpen = true;
+          }}>邀请</Button
+        >
       {/if}
       <Button
         variant="ghost"
@@ -90,3 +108,4 @@
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
+

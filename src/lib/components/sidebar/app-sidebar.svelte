@@ -81,7 +81,7 @@
 
             {#if $currentUser}
               {#each $billStore! as item (item.id)}
-                <BillSideCard billItem={item} />
+                <BillSideCard bill={item} />
               {/each}
             {/if}
           </Sidebar.MenuItem>
