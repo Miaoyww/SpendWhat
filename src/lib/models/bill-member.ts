@@ -19,7 +19,6 @@ export class BillMember {
   // 绑定真正的 User 对象
   bindUser(user: User) {
     this.user = user;
-    this.name = user.username;
     this.id = user.id;
   }
 

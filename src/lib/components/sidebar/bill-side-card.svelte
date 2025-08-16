@@ -114,7 +114,7 @@
       <DropdownMenu.Group>
         <DropdownMenu.Item
           onclick={() => {
-            isSharing = true;
+            NavigateTo(`/bill/share?billId=${billItem.id}`);
           }}
         >
           <div class="flex justify-between items-center">

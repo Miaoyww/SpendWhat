@@ -143,7 +143,7 @@ export class Bill {
 }
 
 export interface BillResponseItem {
-  _id: string;
+  id: string;
   title: string;
   members: any[]; // 后端原始数据中是空数组，假设这里是 User 的简化数据
   created_time: string;
@@ -158,7 +158,13 @@ export function mapResponseToBills(
     console.log("映射账单数据:", item);
     const members: BillMember[] = [];
     item.members.forEach((m) => {
-      members.push(new BillMember(m.name, m._id));
+      let newMember = new BillMember(m.name, m.id);
+      let user: User | undefined;
+      if(m.linked_user){
+        user = new User(m.linked_user.id, m.linked_user.username);
+        newMember.bindUser(user);
+      }
+      members.push(newMember);
     });
 
     const items: BillItem[] = [];
@@ -171,7 +177,7 @@ export function mapResponseToBills(
       item.created_time,
       item.item_updated_time
     );
-    bill.id = item._id;
+    bill.id = item.id;
     return bill;
   });
 }
