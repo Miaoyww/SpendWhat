@@ -13,19 +13,20 @@
   import { tick } from "svelte";
   import { toast } from "svelte-sonner";
   import { Button } from "$lib/components/ui/button";
-  import { CalendarIcon, CheckIcon, ChevronsUpDownIcon } from "lucide-svelte";
+  import { CheckIcon, ChevronsUpDownIcon } from "lucide-svelte";
   import { cn } from "$lib/utils";
   import { BillMember } from "$lib/models/bill-member";
-  import { Calendar } from "$lib/components/ui/calendar/index.js";
 
   let {
     bill = $bindable<Bill>(),
     open = $bindable<boolean>(),
-    showDetail = $bindable<boolean>(),
+    showDetail = $bindable<boolean>(false),
+    billMember = $bindable<BillMember>(),
   } = $props<{
     open: boolean;
     bill: Bill;
-    showDetail: boolean;
+    showDetail?: boolean;
+    billMember?: BillMember;
   }>();
 
   let shareSuccess = $state(false);
@@ -83,18 +84,23 @@
       });
       return;
     }
-    let user = (bill!.members as BillMember[]).find(
-      (m) => m.name === userSelected
-    );
+    let user;
+    if (billMember) {
+      user = billMember;
+    } else {
+      user = (bill!.members as BillMember[]).find(
+        (m) => m.name === userSelected
+      );
+    }
 
     let data = {
       bill_id: bill.id,
       access_role: roleSelected,
       remaining_uses: userInvite ? 1 : remainingUses,
-      ...(userInvite && user ? { bill_member_id: user.id } : {}),
       expires_at: daysLater(Number(dateSelected)).toLocaleString("sv-SE"),
+      ...(user ? { bill_member_id: user.id } : {}),
     };
-
+    console.log("Sharing bill with data:", data);
     if (userInvite && !user) {
       toast.error("分享失败", {
         description: `未找到用户信息`,
@@ -118,19 +124,26 @@
   <Dialog.Content>
     <Dialog.Header>
       <Dialog.Title>分享账单</Dialog.Title>
-      <Dialog.Description>将此账单分享给其他用户</Dialog.Description>
+      {#if billMember}
+        <Dialog.Description>将此账单分享给 {billMember.name}</Dialog.Description
+        >
+      {:else}
+        <Dialog.Description>将此账单分享给其他用户</Dialog.Description>
+      {/if}
     </Dialog.Header>
     <div class="grid gap-4">
       <div class="grid gap-2">
-        {#if !userInvite}
-          <Label class="mt-2">使用次数</Label>
-          <Label class="text-gray-500 text-sm">可取范围在1-16</Label>
-          <Input
-            type="number"
-            min="1"
-            placeholder="请输入使用次数"
-            bind:value={remainingUses}
-          />
+        {#if showDetail}
+          {#if !userInvite}
+            <Label class="mt-2">使用次数</Label>
+            <Label class="text-gray-500 text-sm">可取范围在1-16</Label>
+            <Input
+              type="number"
+              min="1"
+              placeholder="请输入使用次数"
+              bind:value={remainingUses}
+            />
+          {/if}
         {/if}
         <Label class="text-sm">过期时间</Label>
         <Select.Root
@@ -184,58 +197,62 @@
             </Select.Group>
           </Select.Content>
         </Select.Root>
+        {#if showDetail}
+          <div class="flex items-center space-x-2 mt-2">
+            <Label for="invite-user">邀请用户</Label>
+            <Switch id="invite-user" bind:checked={userInvite} />
+          </div>
 
-        <div class="flex items-center space-x-2 mt-2">
-          <Label for="invite-user">邀请用户</Label>
-          <Switch id="invite-user" bind:checked={userInvite} />
-        </div>
-        <Label class="text-gray-500 text-sm">可选.选择用户后仅可使用一次</Label>
-        {#if userInvite}
-          <Popover.Root bind:open={selectorOpen}>
-            <Popover.Trigger bind:ref={triggerRef}>
-              {#snippet child({ props })}
-                <Button
-                  {...props}
-                  variant="outline"
-                  class="w-[200px] justify-between"
-                  role="combobox"
-                  aria-expanded={open}
-                >
-                  {userSelected || "选择邀请的用户"}
-                  <ChevronsUpDownIcon class="opacity-50" />
-                </Button>
-              {/snippet}
-            </Popover.Trigger>
-            <Popover.Content class="w-[200px] p-0">
-              <Command.Root>
-                <Command.Input placeholder="搜索成员..." />
-                <Command.List>
-                  <Command.Empty>暂无成员.</Command.Empty>
-                  <Command.Group value="members">
-                    {#each bill!.members as memberItem (memberItem.id)}
-                      {#if !memberItem.user}
-                        <Command.Item
-                          value={memberItem.name}
-                          onSelect={() => {
-                            userSelected = memberItem.name;
-                            closeAndFocusTrigger();
-                          }}
-                        >
-                          <CheckIcon
-                            class={cn(
-                              userSelected !== memberItem.name &&
-                                "text-transparent"
-                            )}
-                          />
-                          {memberItem.name}
-                        </Command.Item>
-                      {/if}
-                    {/each}
-                  </Command.Group>
-                </Command.List>
-              </Command.Root>
-            </Popover.Content>
-          </Popover.Root>
+          <Label class="text-gray-500 text-sm"
+            >可选.选择用户后仅可使用一次</Label
+          >
+          {#if userInvite}
+            <Popover.Root bind:open={selectorOpen}>
+              <Popover.Trigger bind:ref={triggerRef}>
+                {#snippet child({ props })}
+                  <Button
+                    {...props}
+                    variant="outline"
+                    class="w-[200px] justify-between"
+                    role="combobox"
+                    aria-expanded={open}
+                  >
+                    {userSelected || "选择邀请的用户"}
+                    <ChevronsUpDownIcon class="opacity-50" />
+                  </Button>
+                {/snippet}
+              </Popover.Trigger>
+              <Popover.Content class="w-[200px] p-0">
+                <Command.Root>
+                  <Command.Input placeholder="搜索成员..." />
+                  <Command.List>
+                    <Command.Empty>暂无成员.</Command.Empty>
+                    <Command.Group value="members">
+                      {#each bill!.members as memberItem (memberItem.id)}
+                        {#if !memberItem.user}
+                          <Command.Item
+                            value={memberItem.name}
+                            onSelect={() => {
+                              userSelected = memberItem.name;
+                              closeAndFocusTrigger();
+                            }}
+                          >
+                            <CheckIcon
+                              class={cn(
+                                userSelected !== memberItem.name &&
+                                  "text-transparent"
+                              )}
+                            />
+                            {memberItem.name}
+                          </Command.Item>
+                        {/if}
+                      {/each}
+                    </Command.Group>
+                  </Command.List>
+                </Command.Root>
+              </Popover.Content>
+            </Popover.Root>
+          {/if}
         {/if}
         <Button variant="outline" class="mt-5" onclick={shareBill}>确定</Button>
       </div>
@@ -247,11 +264,13 @@
   <Dialog.Content>
     <Dialog.Header>分享成功</Dialog.Header>
     <div>
-        <Label >复制Token, 邀请其他人加入账单!</Label>
-        <Input class="mt-4" bind:value={token} readonly />
+      <Label>复制Token, 邀请其他人加入账单!</Label>
+      <Input class="mt-4" bind:value={token} readonly />
     </div>
     <Dialog.Footer>
-        <Button variant="ghost" onclick={() => shareSuccess = false}>确定</Button>
+      <Button variant="ghost" onclick={() => (shareSuccess = false)}
+        >确定</Button
+      >
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>

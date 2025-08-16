@@ -57,7 +57,7 @@
   {#if $currentBill}
     {#if $currentBill.members}
       {#each $currentBill.members as member (member.id)}
-        <BillMemberCard {member} />
+        <BillMemberCard {member} bill={$currentBill} />
       {/each}
     {:else}
       <p class="text-gray-500">暂无成员</p>

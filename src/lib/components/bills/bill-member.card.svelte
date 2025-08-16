@@ -1,13 +1,19 @@
 <script lang="ts">
-  import type { BillMember } from "$lib/models/bill-member";
+  import { BillMember } from "$lib/models/bill-member";
   import { ChevronRight } from "lucide-svelte";
   import { Button } from "../ui/button";
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import api from "$lib/utils/request";
   import { currentBill } from "$lib/stores/bill-store";
   import { showAlert } from "$lib/stores/alert-dialog-store";
+  import { Bill } from "$lib/models/bill";
+  import ShareCard from "../dialog/share-card/share-card.svelte";
 
-  let { member = $bindable<BillMember>() } = $props<{ member: BillMember }>();
+  let { member = $bindable<BillMember>(), bill = $bindable<Bill>() } = $props<{
+    member: BillMember;
+    bill: Bill;
+  }>();
+
   let editCardOpen = $state(false);
   let shareCardOpen = $state(false);
 
@@ -109,3 +115,9 @@
   </Dialog.Content>
 </Dialog.Root>
 
+<ShareCard
+  bind:bill
+  bind:open={shareCardOpen}
+  showDetail={false}
+  billMember={member}
+/>
