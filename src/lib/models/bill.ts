@@ -38,7 +38,7 @@ export class Bill {
         title: this.title,
       };
       const response = await api.post("/bill/create", data);
-      this.id = response.data._id;
+      this.id = response.data.id;
     } catch (error) {
       showAlert("错误", "账单创建失败.");
       console.error("账单创建失败:", error);

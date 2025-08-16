@@ -44,9 +44,8 @@
   }
 
   let roleOptions = [
-    { value: "owner", label: "拥有者" },
-    { value: "member", label: "成员" },
-    { value: "observer", label: "游客" },
+    { value: "member", label: "读写" },
+    { value: "observer", label: "只读" },
   ];
 
   let roleSelected = $state("observer");

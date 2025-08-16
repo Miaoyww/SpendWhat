@@ -1,5 +1,5 @@
 export enum BillRole {
-  Owner, // 0
-  Member, // 1
-  Observer, // 2
+  Owner = "owner", // 0
+  Member = "member", // 1
+  Observer = "observer", // 2
 }
