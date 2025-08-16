@@ -1,6 +1,6 @@
 <script lang="ts">
   import { BillMember } from "$lib/models/bill-member";
-  import { ChevronRight } from "lucide-svelte";
+  import { ChevronRight, User } from "lucide-svelte";
   import { Button } from "../ui/button";
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import api from "$lib/utils/request";
@@ -8,6 +8,7 @@
   import { showAlert } from "$lib/stores/alert-dialog-store";
   import { Bill } from "$lib/models/bill";
   import ShareCard from "../dialog/share-card/share-card.svelte";
+  import * as Avatar from "$lib/components/ui/avatar/index.js";
 
   let { member = $bindable<BillMember>(), bill = $bindable<Bill>() } = $props<{
     member: BillMember;
@@ -71,11 +72,12 @@
   );
 </script>
 
-<div
-  class="flex items-center justify-between p-3 rounded-lg shadow-sm hover:shadow-md bg-white"
->
+<div class="flex items-center justify-between p-3 rounded-lg shadow-sm hover:shadow-md bg-white">
   <div class="flex items-center gap-3">
-    <span class="text-lg">{member.name}</span>
+    <Avatar.Root>
+      <Avatar.Fallback>{member.name.charAt(0)}</Avatar.Fallback>
+    </Avatar.Root>
+    <span class="text-base ml-1">{member.name}</span>
   </div>
 
   <div class="flex items-center gap-3">

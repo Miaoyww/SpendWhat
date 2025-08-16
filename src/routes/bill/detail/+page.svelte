@@ -11,7 +11,9 @@
 
   let showAddDialog = $state(false);
   let sortedBillItems = $state<BillItem[]>([]);
-
+  if (!$currentBill) {
+    NavigateTo("/");
+  }
   currentBill.subscribe((value) => {
     if (!value) return;
     console.log("Current bill changed:", value);
@@ -19,11 +21,12 @@
   });
 
   function sortItems(value: BillItem[]) {
-    if(!value) return;
+    if (!value) return;
     sortedBillItems = [];
     sortedBillItems = value.sort((a, b) => {
       return (
-        new Date(b.occurred_time).getTime() - new Date(a.occurred_time).getTime()
+        new Date(b.occurred_time).getTime() -
+        new Date(a.occurred_time).getTime()
       );
     });
   }

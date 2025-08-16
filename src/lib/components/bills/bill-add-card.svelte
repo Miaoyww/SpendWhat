@@ -40,8 +40,8 @@
 
     await newBill.createToServer();
     console.log("上传账单成功:", newBill);
-    await saveUserLocal(user);
-    await saveBillLocal(newBill);
+    // await saveUserLocal(user);
+    // await saveBillLocal(newBill);
 
     console.log("新账单已添加:", newBill);
     billStore.addBill(newBill);

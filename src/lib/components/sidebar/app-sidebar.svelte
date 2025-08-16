@@ -1,13 +1,12 @@
 <script lang="ts">
   import {
     SettingsIcon,
-    UserIcon,
     Search,
     SquarePlus,
     Coins,
+    Maximize,
   } from "lucide-svelte";
 
-  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
   import { Separator } from "$lib/components/ui/separator/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { currentUser } from "$lib/stores/user-store";
@@ -15,8 +14,39 @@
   import BillSideCard from "$lib/components/sidebar/bill-side-card.svelte";
   import { NavigateTo } from "$lib/utils/navigating";
   import * as SearchDialog from "$lib/components/dialog/search-dialog/dialog/index.js";
-  import { searchDialog, showSearchDialog } from "$lib/stores/search-dialog-store";
+  import * as Dialog from "$lib/components/ui/dialog/index.js";
+  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+  import {
+    searchDialog,
+    showSearchDialog,
+  } from "$lib/stores/search-dialog-store";
+  import Input from "../ui/input/input.svelte";
+  import api from "$lib/utils/request";
+  import { toast } from "svelte-sonner";
 
+  let token = $state("");
+  let joinBillOpen = $state(false);
+
+  async function joinBill() {
+    if (!token) return;
+    let data = {
+      token: token,
+    };
+    api
+      .post("/bill/share/consume", data)
+      .then(async () => {
+        joinBillOpen = false;
+        token = "";
+        toast.success("加入成功");
+        await billStore.refreshBill();
+        NavigateTo("/");
+      })
+      .catch((error) => {
+        toast.error("加入失败", {
+          description: error.message || "网络错误",
+        });
+      });
+  }
 </script>
 
 <SearchDialog.Root bind:open={$searchDialog!.open}>
@@ -56,6 +86,20 @@
                   <div class="flex -ml-3 items-center">
                     <SquarePlus />
                     <span class="text-base ml-2">新账单</span>
+                  </div>
+                </Button>
+              </Sidebar.MenuButton>
+              <Sidebar.MenuButton>
+                <Button
+                  class="flex items-center sm:flex outline outline-offset-2"
+                  variant="ghost"
+                  onclick={() => {
+                    joinBillOpen = true;
+                  }}
+                >
+                  <div class="flex -ml-3 items-center">
+                    <Maximize />
+                    <span class="text-base ml-2">加入账单</span>
                   </div>
                 </Button>
               </Sidebar.MenuButton>
@@ -117,3 +161,23 @@
     </Sidebar.Menu>
   </Sidebar.Footer>
 </Sidebar.Root>
+
+<Dialog.Root bind:open={joinBillOpen}>
+  <Dialog.Content>
+    <Dialog.Header>加入账单</Dialog.Header>
+    <Dialog.Description>粘贴其他人给你的Token, 以加入账单</Dialog.Description>
+    <Input
+      class="mt-1"
+      placeholder="token"
+      bind:value={token}
+      onkeydown={async (e) => {
+        if (e.key === "Enter") {
+          await joinBill();
+        }
+      }}
+    />
+    <Dialog.Footer>
+      <Button variant="outline" onclick={joinBill}>加入</Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>
