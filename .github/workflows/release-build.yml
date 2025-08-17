@@ -3,8 +3,6 @@ name: Release Build
 on:
   # git tag 触发。
   push:
-    branches:
-      - main
     tags:
       - "v*.*.*"
 
@@ -17,7 +15,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
     # 检查标签和版本一致性
       - name: Check tag and package.json version
         run: |
