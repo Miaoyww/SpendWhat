@@ -1,8 +1,7 @@
 import axios from "axios";
-import { PUBLIC_API_URL, PUBLIC_API_PORT } from '$env/static/public';
 
-const PORT = PUBLIC_API_PORT;
-const HOST_URL = PUBLIC_API_URL + (PORT ? `:${PORT}` : ""); // 全局HOST基础路径
+const PORT = 3000;
+const HOST_URL = "http://localhost" + (PORT ? `:${PORT}` : ""); // 全局HOST基础路径
 const API_URL = `${HOST_URL}/api`; // 全局API基础路径
 
 const api = axios.create({
