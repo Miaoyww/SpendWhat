@@ -7,7 +7,7 @@
   currentUser.subscribe((user) => {
     if (user) {
       //如果已经登录，跳转到用户页面
-      NavigateTo("/user");
+      NavigateTo("/app/user");
     }
   });
 </script>

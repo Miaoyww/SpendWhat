@@ -16,7 +16,6 @@
   import { Bill } from "$lib/models/bill";
   import { NavigateTo } from "$lib/utils/navigating";
   import { Input } from "$lib/components/ui/input/index.js";
-  import { HOST_URL } from "$lib/utils/request";
   import { cn } from "$lib/utils";
   import ShareCard from "../dialog/share-card/share-card.svelte";
 
@@ -75,7 +74,7 @@
   onclick={async () => {
     currentBill.set(bill);
     await $currentBill?.getItemFromServer();
-    NavigateTo(`/bill/detail?id=${bill.id}`);
+    NavigateTo(`/app/bill/detail`);
   }}
 >
   <span

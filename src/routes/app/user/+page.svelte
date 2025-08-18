@@ -12,14 +12,14 @@
      let user = await loginByCookie(data.session);
      currentUser.set(user);
      if(!user){
-      NavigateTo("/user/login");
+      NavigateTo("/app/user/login");
      }
       
   
   });
   function logout(){
     logoutUser();
-    goto("/user/login");
+    goto("/app/user/login");
     showAlert("成功", "您已退出登录");
   }
 </script>

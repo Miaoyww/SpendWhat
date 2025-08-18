@@ -11,15 +11,9 @@
   import { NavigateTo, isBillPage } from "$lib/utils/navigating";
   import { billStore, currentBill } from "$lib/stores/bill-store";
   import { Bill } from "$lib/models/bill";
+  import ShareCard from "../dialog/share-card/share-card.svelte";
   let isBillNow: boolean = $state(false);
-
-  let _currentBill: Bill | null = $state(null);
-
-  currentBill.subscribe((bill) => {
-    if (bill) {
-      _currentBill = bill;
-    }
-  });
+  let isSharing = $state(false);
 
   isBillPage.subscribe((value) => {
     isBillNow = value;
@@ -40,7 +34,7 @@
       class="text-base font-medium"
       onclick={() => {
         if (isBillNow) {
-          NavigateTo(`/bill/detail?id=${_currentBill?.id}`);
+          NavigateTo(`/app/bill/detail`);
         } else {
           NavigateTo("/");
         }
@@ -81,7 +75,7 @@
               class="sm:flex outline outline-offset-2"
               onclick={() => {
                 if (currentBill) {
-                  NavigateTo(`/bill/settings?id=${_currentBill?.id}`);
+                  NavigateTo(`/app/bill/settings`);
                 }
               }}
             >
@@ -96,9 +90,7 @@
               size="sm"
               class="sm:flex outline outline-offset-2"
               onclick={() => {
-                if (currentBill) {
-                  NavigateTo(`/bill/share?id=${_currentBill?.id}`);
-                }
+                isSharing = true;
               }}
             >
               <SquareArrowOutUpRight />
@@ -121,3 +113,5 @@
     </div>
   </div>
 </header>
+
+<ShareCard bill={$currentBill!} bind:open={isSharing} showDetail={true} />

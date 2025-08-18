@@ -31,7 +31,7 @@
     if (isRegistered) {
       await loginUser($state.snapshot(userName), $state.snapshot(sha256(password)));
       // 注册成功，跳转到用户主页
-      NavigateTo("/user/");
+      NavigateTo("/app/user/");
     }
   }
 </script>
@@ -68,7 +68,7 @@
     </div>
     <div class="mt-4 text-center text-sm">
       已经有帐户?
-      <a href="/user/login" class="underline"> 立即登录 </a>
+      <a href="/app/user/login" class="underline"> 立即登录 </a>
     </div>
   </Card.Content>
 </Card.Root>

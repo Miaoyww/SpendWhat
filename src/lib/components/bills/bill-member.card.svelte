@@ -17,9 +17,12 @@
   import { toast } from "svelte-sonner";
   import { NavigateTo } from "$lib/utils/navigating";
 
-  let { member = $bindable<BillMember>(), bill = $bindable<Bill>() } = $props<{
+  let {
+    member = $bindable<BillMember>(),
+    bill = $bindable<Bill>()
+  } = $props<{
     member: BillMember;
-    bill: Bill;
+    bill?: Bill;
   }>();
 
   let editCardOpen = $state(false);
@@ -156,40 +159,40 @@
     </Avatar.Root>
     <span class="text-base ml-1">{member.name}</span>
   </div>
-
-  <div class="flex items-center gap-3">
-    <div class="text-right">
-      {#if bindAble()}
-        <Button
-          variant="ghost"
-          onclick={() => {
-            bindCardOpen = true;
-          }}>绑定</Button
-        >
-      {/if}
-      {#if currentUserRole() === BillRole.Owner}
-        {#if !member.user}
+  
+    <div class="flex items-center gap-3">
+      <div class="text-right">
+        {#if bindAble()}
           <Button
             variant="ghost"
             onclick={() => {
-              shareCardOpen = true;
-            }}>邀请</Button
+              bindCardOpen = true;
+            }}>绑定</Button
           >
         {/if}
-      {/if}
+        {#if currentUserRole() === BillRole.Owner}
+          {#if !member.user}
+            <Button
+              variant="ghost"
+              onclick={() => {
+                shareCardOpen = true;
+              }}>邀请</Button
+            >
+          {/if}
+        {/if}
 
-      {#if editAble}
-        <Button
-          variant="ghost"
-          onclick={() => {
-            editCardOpen = true;
-          }}
-        >
-          <ChevronRight />
-        </Button>
-      {/if}
+        {#if editAble}
+          <Button
+            variant="ghost"
+            onclick={() => {
+              editCardOpen = true;
+            }}
+          >
+            <ChevronRight />
+          </Button>
+        {/if}
+      </div>
     </div>
-  </div>
 </div>
 
 <Dialog.Root bind:open={editCardOpen}>

@@ -32,7 +32,7 @@
     );
     if (isLoggedIn) {
       // 登录成功，跳转到首页
-      NavigateTo("/user");
+      NavigateTo("/app/user");
     }
   }
 </script>
@@ -72,7 +72,7 @@
     </div>
     <div class="mt-4 text-center text-sm">
       还没有帐户?
-      <a href="/user/register" class="underline"> 立即注册 </a>
+      <a href="/app/user/register" class="underline"> 立即注册 </a>
     </div>
   </Card.Content>
 </Card.Root>

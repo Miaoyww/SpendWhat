@@ -2,10 +2,6 @@ import axios from "axios";
 import { writable } from "svelte/store";
 import { showAlert } from "./alert-dialog-store";
 import { User } from "$lib/models/user";
-import {
-  saveUserLocal,
-  getBillsByUserId,
-} from "$lib/stores/data-store";
 import { billStore, getCurrentUserBillsFromServer } from "./bill-store";
 import api from "$lib/utils/request";
 
@@ -26,14 +22,10 @@ export async function getCurrentUser(): Promise<User | null> {
     .then(async (response) => {
       user = new User(response.data.id, response.data.username);
       currentUser.set(user);
-      await saveUserLocal(user);
 
       if (user && user.id) {
         let bills = await getCurrentUserBillsFromServer();
 
-        if (!bills) {
-          bills = await getBillsByUserId(user.id);
-        }
         billStore.clear();
         billStore.addBillList(bills);
       }

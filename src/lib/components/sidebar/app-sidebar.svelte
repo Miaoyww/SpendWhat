@@ -33,7 +33,7 @@
       token: token,
     };
     api
-      .post("/bill/share/consume", data)
+      .post("/app/bill/share/consume", data)
       .then(async () => {
         joinBillOpen = false;
         token = "";
@@ -80,7 +80,7 @@
                   class="flex items-center sm:flex outline outline-offset-2"
                   variant="ghost"
                   onclick={() => {
-                    NavigateTo("/");
+                    NavigateTo("/app/bill/setup");
                   }}
                 >
                   <div class="flex -ml-3 items-center">
@@ -140,7 +140,7 @@
         <div style="float: left;">
           <Sidebar.MenuButton>
             <div style="display: flex; align-items: center;">
-              <a href="/user" class="flex items-center">
+              <a href="/app/user" class="flex items-center">
                 {#if $currentUser}
                   <span class="ml-1">{$currentUser.username}</span>
                 {:else}
@@ -152,7 +152,7 @@
         </div>
         <div style="float: right;">
           <Sidebar.MenuButton>
-            <a href="/settings">
+            <a href="/app/settings">
               <SettingsIcon size={18} />
             </a>
           </Sidebar.MenuButton>

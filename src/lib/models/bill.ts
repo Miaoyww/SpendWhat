@@ -14,28 +14,36 @@ export class Bill {
   members: BillMember[];
   items: BillItem[]; // 可以换成 Member[] 如果成员有更多信息
   created_time: Date;
+  occurred_at: Date;
   item_updated_time: Date;
+  currency: string;
 
   constructor(
     title: string,
     owner: User,
     members: BillMember[],
     items: BillItem[],
-    created_time: string,
-    item_updated_time: string
+    created_time: Date,
+    item_updated_time: Date,
+    currency: string,
+    occurred_at: Date
   ) {
     this.title = title;
+    this.currency = currency;
     this.owner = owner;
     this.members = members;
     this.items = items;
-    this.created_time = new Date(created_time);
-    this.item_updated_time = new Date(item_updated_time);
+    this.occurred_at = occurred_at;
+    this.created_time = created_time;
+    this.item_updated_time = item_updated_time;
   }
 
   async createToServer() {
     try {
       let data = {
         title: this.title,
+        occurred_at: this.occurred_at.toISOString(),
+        currency: this.currency
       };
       const response = await api.post("/bill/create", data);
       this.id = response.data.id;
@@ -189,40 +197,38 @@ export class Bill {
 }
 
 export interface BillResponseItem {
-    /**
-     * 创建人
-     */
-    created_by: UserPublic;
-    /**
-     * 创建时间
-     */
-    created_time: Date;
-    id: string;
-    /**
-     * 更新时间
-     */
-    item_updated_time: Date;
-    /**
-     * 成员列表
-     */
-    members: BillMemberPublic[];
-    /**
-     * 标题
-     */
-    title: string;
-    [property: string]: any;
+
+  created_by: UserPublic;
+  created_time: Date;
+  id: string;
+  item_updated_time: Date;
+  members: BillMemberPublic[];
+  title: string;
+  [property: string]: any;
 }
 
-
 export function mapResponseToBills(
-  responseData: BillResponseItem[],
-  currentUser: User
+  responseData: BillResponseItem[]
 ): Bill[] {
   return responseData.map((item) => {
     console.log("映射账单数据:", item);
+
+    const items: BillItem[] = [];
+
+    const bill = new Bill(
+      item.title,
+      new User(item.created_by.id, item.created_by.username),
+      [],
+      items,
+      item.created_time,
+      item.item_updated_time,
+      item.currency,
+      item.occured_at
+    );
+    bill.id = item.id;
     const members: BillMember[] = [];
     item.members.forEach((m) => {
-      let newMember = new BillMember(m.name, m.id);
+      let newMember = new BillMember(m.name, bill);
       let user: User | undefined;
 
       if (m.linked_user) {
@@ -231,18 +237,7 @@ export function mapResponseToBills(
       }
       members.push(newMember);
     });
-
-    const items: BillItem[] = [];
-
-    const bill = new Bill(
-      item.title,
-      new User(item.created_by.id, item.created_by.username),
-      members,
-      items,
-      item.created_time.toLocaleString("sv-SE"),
-      item.item_updated_time.toLocaleString("sv-SE")
-    );
-    bill.id = item.id;
+    bill.members = members;
     return bill;
   });
 }

@@ -6,7 +6,6 @@ import {
   mapResponseToBills,
 } from "$lib/models/bill";
 import { BillItem } from "$lib/models/bill-item";
-import { deleteBillLocal, saveBillLocal } from "$lib/stores/data-store";
 import { currentUser } from "$lib/stores/user-store";
 import api from "$lib/utils/request";
 import type { User } from "$lib/models/user";
@@ -44,7 +43,6 @@ function getBillById(id: string): Bill | undefined {
 // 添加新账单
 function addBill(newBill: Bill) {
   billsStore.update((bills) => [...bills, newBill]);
-  saveBillLocal(newBill);
 
   sortBillByTime();
 }
@@ -73,7 +71,6 @@ function removeBill(id: string) {
     NavigateTo("/");
   }
   console.log("删除账单:", id);
-  deleteBillLocal(id);
 
   sortBillByTime();
 }
@@ -95,7 +92,6 @@ function updateBill(updatedBill: Bill) {
       bills[index] = updatedBill;
     }
 
-    saveBillLocal(updatedBill);
     updateBillToServer(updatedBill);
     return [...bills];
   });
