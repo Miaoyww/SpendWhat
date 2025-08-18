@@ -45,7 +45,7 @@ export class Bill {
   // 计算某个成员的支出
   getMemberSpending(member: BillMember): number {
     return this.items
-      .filter((item) => item.created_by && item.created_by.id === member.id)
+      .filter((item) => item.paid_by.id === member.id)
       .reduce((total, item) => Number(total) + Number(item.amount), 0);
   }
 
@@ -99,9 +99,14 @@ export class Bill {
         limit: 30,
       };
       const response = await api.post(`/bill/item/list`, data);
-
       response.data.forEach((item: any) => {
+        console.log("获取账单项:", item);
         //如果id有重则不新建
+        let member = new BillMember(item.paid_by.name, this, item.paid_by.id);
+        if(item.paid_by.linked_user){
+          member.bindUser(new User(item.paid_by.linked_user.id,item.paid_by.linked_user.username));
+        }
+
         if (!this.items.find((i) => i.id === item._id)) {
           const billItem = new BillItem(
             this,
@@ -110,7 +115,7 @@ export class Bill {
             item.description,
             item.amount as number,
             item.currency,
-            new BillMember(item.paid_by.name, item.paid_by.id),
+            member,
             new Date(item.created_time),
             new Date(item.occurred_time)
           );

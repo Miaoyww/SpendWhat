@@ -10,8 +10,22 @@
   import { Label } from "$lib/components/ui/label";
   import { NavigateTo } from "$lib/utils/navigating";
 
+  if (!$currentBill) {
+    NavigateTo("/");
+  }
+
   let showAddDialog = $state(false);
   let sortedBillItems = $state<BillItem[]>([]);
+
+  let selfTotal = $derived.by(() => {
+    return $currentBill!.getMemberSpending(
+      $currentBill!.getUserFromBillMember($currentUser!)!
+    );
+  });
+
+  let billTotal = $derived.by(() => {
+    return $currentBill!.totalAmount;
+  });
 
   currentBill.subscribe((value) => {
     if (!value) return;
@@ -39,9 +53,7 @@
       <div class="flex flex-col items-left">
         <Label class="text-lg font-bold">你已支出</Label>
         <Label class="text-base font-bold"
-          >{$currentBill!.getMemberSpending(
-            $currentBill!.getUserFromBillMember($currentUser!)!
-          )}
+          >{selfTotal}
           {$currentBill!.currency}</Label
         >
       </div>
@@ -67,7 +79,7 @@
         <div class="flex flex-col items-left">
           <Label class="text-lg font-bold">团队共支出</Label>
           <Label class="text-base font-bold"
-            >{$currentBill!.totalAmount} {$currentBill!.currency}</Label
+            >{billTotal} {$currentBill!.currency}</Label
           >
         </div>
 
@@ -126,9 +138,9 @@
 </Button>
 
 {#key showAddDialog}
-<BillItemAddCard
-  title="添加新账单"
-  bind:open={showAddDialog}
-  bill={$currentBill}
-/>
+  <BillItemAddCard
+    title="添加新账单"
+    bind:open={showAddDialog}
+    bill={$currentBill}
+  />
 {/key}

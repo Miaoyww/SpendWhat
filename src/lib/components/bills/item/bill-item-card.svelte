@@ -49,25 +49,8 @@
     },
   ];
 
-  // 限制的货币列表（从 user.currencies 获取）
-  let allowedCurrencies = [
-    {
-      value: "USD",
-      label: "usd",
-    },
-    {
-      value: "EUR",
-      label: "eur",
-    },
-    {
-      value: "CNY",
-      label: "cny",
-    },
-  ];
-
   // FORM DATA
   let emoji = $state(item.type_icon);
-  let currency: string = $state(item.currency);
   let description = $state(item.description);
   let amount = $state(item.amount);
   let type = $state(item.type);
@@ -75,11 +58,11 @@
     (item.occurred_time as Date).toLocaleString("sv-SE")
   );
 
-  let selectedUserName = $state(item.created_by.name);
+  let selectedUserName = $state(item.paid_by.name);
 
   let editOpen = $state(false);
   let open = $state(false);
-  let value = $state(item.created_by.name);
+  let value = $state(item.paid_by.name);
 
   let triggerRef = $state<HTMLButtonElement>(null!);
     
@@ -97,17 +80,19 @@
         showAlert("错误", "未选择支付方");
         return;
       }
+      
       const updated: BillItem = new BillItem(
         item.bill,
         type,
         emoji,
         description,
         Number(amount),
-        currency,
+        item.bill.currency,
         created_by,
         new Date(occurred_time),
         item.created_time
       );
+
       updated.id = item.id; // 保持原有ID
       console.log("保存编辑的账单项:", updated);
       await item.bill.updateItem(updated);
@@ -132,6 +117,8 @@
   }
 </script>
 
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
   class="flex items-center justify-between p-3 rounded-lg shadow-sm hover:shadow-md bg-white"
   onclick={() => {
@@ -148,7 +135,7 @@
     <div>
       <div class="font-medium text-sm">{item.description}</div>
       <div class="text-xs text-muted-foreground">
-        由{item.created_by.name}支付
+        由{item.paid_by.name}支付
       </div>
     </div>
   </div>
@@ -192,19 +179,6 @@
 
       <Label class="text-sm">金额</Label>
       <Input type="number" bind:value={amount} step="0.01" />
-
-      <Label class="text-sm">货币</Label>
-      <!-- 限制的货币选择 -->
-      <Select.Root type="single" bind:value={currency}>
-        <Select.Trigger>
-          {currency}
-        </Select.Trigger>
-        <Select.Content>
-          {#each allowedCurrencies as cur (cur.label)}
-            <Select.Item value={cur.value}>{cur.value}</Select.Item>
-          {/each}
-        </Select.Content>
-      </Select.Root>
 
       <Label class="text-sm">支付方</Label>
 

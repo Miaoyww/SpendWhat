@@ -15,7 +15,7 @@ export class BillItem {
   currency: string;
   created_time: Date;
   occurred_time: Date;
-  created_by: BillMember;
+  paid_by: BillMember;
 
   constructor(
     bill: Bill,
@@ -24,11 +24,11 @@ export class BillItem {
     description: string,
     amount: number,
     currency: string,
-    created_by: BillMember,
+    paid_by: BillMember,
     created_time: Date,
     occurred_time: Date
   ) {
-    this.created_by = created_by;
+    this.paid_by = paid_by;
     this.bill = bill;
     this.type = type;
     this.type_icon = type_icon;
@@ -50,7 +50,7 @@ export class BillItem {
         amount: String(this.amount),
         currency: this.currency,
         occurred_time: this.occurred_time.toISOString(),
-        paid_by: this.created_by.id,
+        paid_by: this.paid_by.id,
       };
 
       const response = await api.post("/bill/item/create", data);
@@ -71,7 +71,7 @@ export class BillItem {
       amount: String(this.amount),
       currency: this.currency,
       occurred_time: this.occurred_time.toLocaleString("sv-SE"),
-      paid_by: this.created_by.id,
+      paid_by: this.paid_by.id,
     };
     console.log("更新账单项数据:", data);
     await api.post("/bill/item/update", data).catch((error) => {

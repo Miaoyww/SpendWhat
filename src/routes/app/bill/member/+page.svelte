@@ -7,7 +7,12 @@
   import api from "$lib/utils/request";
   import { BillMember } from "$lib/models/bill-member";
   import { toast } from "svelte-sonner";
+  import { NavigateTo } from "$lib/utils/navigating";
 
+  if (!$currentBill) {
+    NavigateTo("/");
+  }
+  
   let newName = $state("");
 
   function addMember() {
