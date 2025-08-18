@@ -1,5 +1,7 @@
 # SpendWhat Web
 
+I English very bad, I no know I spend what.
+
 powered by [`sv`](https://github.com/sveltejs/cli).
 
 ## 部署
