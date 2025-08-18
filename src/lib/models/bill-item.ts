@@ -6,6 +6,7 @@ import type { BillMember } from "./bill-member";
 
 export class BillItem {
   id?: string;
+  uiId: string;
   bill: Bill;
   type: string;
   type_icon: string;
@@ -36,6 +37,7 @@ export class BillItem {
     this.currency = currency;
     this.created_time = new Date(created_time);
     this.occurred_time = new Date(occurred_time);
+    this.uiId = crypto.randomUUID();
   }
 
   async createToServer() {
@@ -47,14 +49,14 @@ export class BillItem {
         description: this.description,
         amount: String(this.amount),
         currency: this.currency,
-        occurred_time: this.occurred_time.toLocaleString("sv-SE"),
+        occurred_time: this.occurred_time.toISOString(),
         paid_by: this.created_by.id,
       };
 
       const response = await api.post("/bill/item/create", data);
       this.id = response.data.bill_item_id;
     } catch (error) {
-      showAlert("错误", "账单创建失败.");
+      showAlert("错误", `账单创建失败. ${error}`);
       console.error("账单创建失败:", error);
     }
   }

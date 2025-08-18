@@ -4,6 +4,7 @@
   import { Button } from "$lib/components/ui/button";
   import { BillItem } from "$lib/models/bill-item";
   import { currentBill } from "$lib/stores/bill-store";
+  import { currentUser } from "$lib/stores/user-store";
   import { Menu, Plus } from "lucide-svelte";
   import * as Card from "$lib/components/ui/card/index.js";
   import { Label } from "$lib/components/ui/label";
@@ -11,9 +12,7 @@
 
   let showAddDialog = $state(false);
   let sortedBillItems = $state<BillItem[]>([]);
-  if (!$currentBill) {
-    NavigateTo("/");
-  }
+
   currentBill.subscribe((value) => {
     if (!value) return;
     console.log("Current bill changed:", value);
@@ -39,7 +38,12 @@
       <!-- 上方内容 -->
       <div class="flex flex-col items-left">
         <Label class="text-lg font-bold">你已支出</Label>
-        <Label class="text-base font-bold">6136.59 CNY</Label>
+        <Label class="text-base font-bold"
+          >{$currentBill!.getMemberSpending(
+            $currentBill!.getUserFromBillMember($currentUser!)!
+          )}
+          {$currentBill!.currency}</Label
+        >
       </div>
 
       <!-- 底部按钮 -->
@@ -62,10 +66,12 @@
         <!--左并列-->
         <div class="flex flex-col items-left">
           <Label class="text-lg font-bold">团队共支出</Label>
-          <Label class="text-base font-bold">6136.59 CNY</Label>
+          <Label class="text-base font-bold"
+            >{$currentBill!.totalAmount} {$currentBill!.currency}</Label
+          >
         </div>
 
-        <div class="text-base mt-2">1423 笔交易</div>
+        <div class="text-base mt-2">{$currentBill!.items.length} 笔交易</div>
       </Card.Content>
     </Card.Root>
 
@@ -86,7 +92,7 @@
             variant="ghost"
             class="mr-3"
             onclick={() => {
-              NavigateTo(`/bill/member?id=${$currentBill!.id}`);
+              NavigateTo(`/app/bill/member`);
             }}
           >
             <Menu size={36} />
@@ -102,7 +108,7 @@
 {#if $currentBill}
   {#if sortedBillItems}
     <div class="space-y-2">
-      {#each sortedBillItems as item (item.id)}
+      {#each sortedBillItems as item (item.uiId)}
         <BillItemCard {item} />
       {/each}
     </div>
@@ -119,8 +125,10 @@
   <Plus size={24} />
 </Button>
 
+{#key showAddDialog}
 <BillItemAddCard
   title="添加新账单"
   bind:open={showAddDialog}
   bill={$currentBill}
 />
+{/key}

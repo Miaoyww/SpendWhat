@@ -38,12 +38,27 @@ export class Bill {
     this.item_updated_time = item_updated_time;
   }
 
+  getUserFromBillMember(user: User): BillMember | undefined {
+    return this.members.find((member) => member.user?.id === user.id);
+  }
+
+  // 计算某个成员的支出
+  getMemberSpending(member: BillMember): number {
+    return this.items
+      .filter((item) => item.created_by && item.created_by.id === member.id)
+      .reduce((total, item) => Number(total) + Number(item.amount), 0);
+  }
+
+  get totalAmount(): number {
+    return this.items.reduce((total, item) => Number(total) + Number(item.amount), 0);
+  }
+
   async createToServer() {
     try {
       let data = {
         title: this.title,
         occurred_at: this.occurred_at.toISOString(),
-        currency: this.currency
+        currency: this.currency,
       };
       const response = await api.post("/bill/create", data);
       this.id = response.data.id;
@@ -153,7 +168,7 @@ export class Bill {
     }
   }
 
-  async addItem(newItem: BillItem) {
+   addItem(newItem: BillItem) {
     this.items.push(newItem);
     this.updateItemTime();
   }
@@ -197,7 +212,6 @@ export class Bill {
 }
 
 export interface BillResponseItem {
-
   created_by: UserPublic;
   created_time: Date;
   id: string;
@@ -207,9 +221,7 @@ export interface BillResponseItem {
   [property: string]: any;
 }
 
-export function mapResponseToBills(
-  responseData: BillResponseItem[]
-): Bill[] {
+export function mapResponseToBills(responseData: BillResponseItem[]): Bill[] {
   return responseData.map((item) => {
     console.log("映射账单数据:", item);
 
@@ -228,7 +240,7 @@ export function mapResponseToBills(
     bill.id = item.id;
     const members: BillMember[] = [];
     item.members.forEach((m) => {
-      let newMember = new BillMember(m.name, bill);
+      let newMember = new BillMember(m.name, bill, m.id);
       let user: User | undefined;
 
       if (m.linked_user) {

@@ -51,27 +51,10 @@
     },
   ];
 
-  // 限制的货币列表（从 user.currencies 获取）
-  let allowedCurrencies = [
-    {
-      value: "USD",
-      label: "usd",
-    },
-    {
-      value: "EUR",
-      label: "eur",
-    },
-    {
-      value: "CNY",
-      label: "cny",
-    },
-  ];
-
   let bill_type = $state("");
   let emoji = $state(allowedEmojis[0].value);
   let description = $state("");
   let amount: number = $state(0);
-  let currency: string = $state(allowedCurrencies[0].value);
   let occurred_time = $state(new Date().toLocaleString("sv-SE"));
 
   let selectedUserName = $state($currentUser!.username);
@@ -87,9 +70,8 @@
     (bill.members as BillMember[]).find((f) => f.name === selectedUserName)
       ?.name
   );
-  const id = Math.trunc(Math.random() * Number.MAX_SAFE_INTEGER).toString();
-  $effect(() => {
-  });
+  
+  $effect(() => {});
 
   function closeAndFocusTrigger() {
     tick().then(() => {
@@ -98,21 +80,20 @@
   }
 
   async function addItem() {
+    open = false;
+
     //如果有一项未填则不许通过
-    if (!bill_type || !description || !amount || !currency || !emoji) {
-      open = false;
+    if (!bill_type || !description || !amount || !emoji) {
       showAlert("错误", "请填写所有必填项");
       return;
     }
 
     let user = selectedUser();
     if (!user) {
-      open = false;
       showAlert("错误", "请选择一个支付方");
       return;
     }
     if (!bill) {
-      open = false;
       showAlert("错误", "bill不能为空");
       return;
     }
@@ -123,15 +104,17 @@
       emoji,
       description,
       amount,
-      currency,
+      $currentBill!.currency,
       user,
       new Date(),
       new Date(occurred_time)
     );
+
     await newItem.createToServer();
     await $currentBill?.addItem(newItem);
     billStore.updateCurrentBill();
-    open = false;
+
+
   }
 </script>
 
@@ -165,19 +148,6 @@
 
       <Label class="text-sm">金额</Label>
       <Input bind:value={amount} type="number" placeholder="金额" />
-
-      <Label class="text-sm">货币</Label>
-      <!-- 限制的货币选择 -->
-      <Select.Root type="single" bind:value={currency}>
-        <Select.Trigger>
-          {currency}
-        </Select.Trigger>
-        <Select.Content>
-          {#each allowedCurrencies as cur (cur.label)}
-            <Select.Item value={cur.value}>{cur.value}</Select.Item>
-          {/each}
-        </Select.Content>
-      </Select.Root>
 
       <Label class="text-sm">支付方</Label>
 

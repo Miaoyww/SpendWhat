@@ -168,7 +168,7 @@ export function getCurrentUserBillsFromServer(): Bill[] {
       user = value;
     });
     if (user) {
-      const bills = mapResponseToBills(billsRaw, user);
+      const bills = mapResponseToBills(billsRaw);
       billsStore.set(bills);
       return bills.sort(
         (a, b) =>

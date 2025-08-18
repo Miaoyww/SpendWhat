@@ -53,14 +53,15 @@
       JSON.parse(newBillMembers).forEach(async (member: any) => {
         let newMember = new BillMember(member.name, newBill);
         await newMember.createToServer();
-        members.push(newMember);
         if (member.user) {
           let user = new User(member.user.id, member.user.username);
           newMember.bindUser(user);
+          await newMember.bindUserToServer();
         }
+        members.push(newMember);
       });
       newBill.members = members;
-
+      console.log("新建账单:", newBill);
       billStore.addBill(newBill);
       currentBill.set(newBill);
 
