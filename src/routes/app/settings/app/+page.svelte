@@ -7,13 +7,12 @@
 </script>
 
 <div class="text-center mt-6 pb-10 lg:max-w-4xl">
-  <h1 class="text-4xl font-extrabold tracking-wide">SpendWhat</h1>
-  <!-- 下面放一排图标 -->
-  <div class="flex justify-center gap-6 mt-4 text-gray-600">
+  <div class="flex justify-center gap-6 mb-4 text-gray-600">
     <Label class="flex justify-center w-50 h-50 bg-gray-100 rounded-2xl"
       >图标还没做</Label
     >
   </div>
+  <h1 class="text-4xl font-extrabold tracking-wide">SpendWhat</h1>
 </div>
 
 <div class="space-y-3 pb-10 lg:max-w-4xl">

@@ -1,7 +1,8 @@
 <script lang="ts">
   import SettingsNav from "$lib/components/settings/settings-nav.svelte";
   import { Separator } from "$lib/components/ui/separator";
-
+  import { IsMobile } from "$lib/hooks/is-mobile.svelte";
+  import { cn } from "$lib/utils";
   const items = [
     {
       title: "常规",
@@ -27,7 +28,7 @@
   </div>
   <Separator class="my-3 md:my-6" />
   <div class="flex flex-col lg:flex-row gap-x-12 grow min-h-0">
-    <aside class="lg:grow lg:max-w-60 flex flex-col">
+    <aside class={cn("lg:grow lg:max-w-60 flex flex-col")}>
       <SettingsNav {items} />
     </aside>
     <div class="flex-1 pb-40">
@@ -35,4 +36,3 @@
     </div>
   </div>
 </div>
-
