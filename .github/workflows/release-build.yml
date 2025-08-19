@@ -69,14 +69,16 @@ jobs:
         run: |
           pnpm tauri ios init
   
-      - name: Build Tauri (Unsigned iOS .ipa)
+      - name: Build Tauri iOS without signing
         run: |
           export RUST_LOG=info
-          pnpm tauri ios build -- \
-            -allowProvisioningUpdates \
-            -allowProvisioningDeviceRegistration \
-            -destination generic/platform=iOS \
-            CODE_SIGN_STYLE="Automatic"
+          # 完全禁用代码签名
+          pnpm tauri ios build --verbose -- \
+            CODE_SIGNING_ALLOWED="NO" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED="NO" \
+            DEVELOPMENT_TEAM="" \
+            PROVISIONING_PROFILE_SPECIFIER=""
             
       - name: Package IPA
         run: |
