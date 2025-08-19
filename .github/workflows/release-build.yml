@@ -1,79 +1,96 @@
-name: Build iOS Unsigned IPA
+name: Build Tauri iOS (Unsigned)
 
 on:
   workflow_dispatch:
 
 jobs:
-  ios-unsigned-ipa:
+  build-ios:
     runs-on: macos-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # 1. 获取代码
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      # 2. 安装 Rust
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
         with:
-          node-version: lts/*
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-          run_install: false
+      # 3. 安装 Tauri CLI
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --force
 
-      - name: Install dependencies
-        run: pnpm i
-
-      - name: Build frontend
-        run: pnpm build
-
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
-
-      - name: Init Tauri iOS (if needed)
-        run: pnpm tauri ios init || echo "iOS already initialized"
-
-      - name: Copy frontend build into Xcode project
+      # 4. 安装 Node.js（fnm 管理）并安装依赖
+      - name: Setup Node.js and dependencies
         run: |
-          RES_DIR="src-tauri/gen/apple/App/Resources"
-          mkdir -p "$RES_DIR"
-          cp -r build/* "$RES_DIR/"
+          curl -fsSL https://fnm.vercel.app/install | bash
+          export PATH="$HOME/.fnm:$PATH"
+          fnm install --lts
+          fnm use --lts
+          npm ci
 
-      - name: Patch Xcode project to disable signing
-        run: |
-          PBXPROJ="src-tauri/gen/apple/app.xcodeproj/project.pbxproj"
-          sed -i '' 's/DEVELOPMENT_TEAM = .*/DEVELOPMENT_TEAM = "";/g' "$PBXPROJ"
-          sed -i '' 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PBXPROJ"
-          sed -i '' 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$PBXPROJ"
+      # 5. 安装 CocoaPods
+      - name: Install CocoaPods
+        run: brew install cocoapods
 
-      - name: Build Debug IPA (Unsigned)
+      # 6. 构建 Tauri App
+      - name: Build Tauri App
+        run: npm run tauri build
+
+      # 7. 自动生成 ExportOptions.plist
+      - name: Generate ExportOptions.plist
         run: |
+          cat <<EOF > src-tauri/ExportOptions.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>development</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>compileBitcode</key>
+            <false/>
+            <key>destination</key>
+            <string>export</string>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>teamID</key>
+            <string></string>
+          </dict>
+          </plist>
+          EOF
+
+      # 8. 构建 iOS 未签名 app
+      - name: Build iOS unsigned IPA
+        run: |
+          cd src-tauri/target/release/bundle
           xcodebuild \
-            -workspace src-tauri/gen/apple/app.xcodeproj/project.xcworkspace \
-            -scheme app_iOS \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
             -configuration Debug \
             -sdk iphoneos \
-            BUILD_DIR=build/ios \
             CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            DEVELOPMENT_TEAM=""
+            BUILD_DIR=build/ios \
+            clean build
 
-      - name: Package IPA
+      # 9. 打包 IPA（未签名）
+      - name: Archive IPA
         run: |
-          APP_PATH=$(find build/ios/Debug-iphoneos -name "*.app" -type d | head -n 1)
-          mkdir -p Payload
-          cp -r "$APP_PATH" Payload/
-          IPA_NAME="spend-what-ios-unsigned-${GITHUB_RUN_ID}.ipa"
-          zip -r "$IPA_NAME" Payload
-          rm -rf Payload
-          echo "IPA_NAME=$IPA_NAME" >> $GITHUB_ENV
+          cd src-tauri/target/release/bundle/build/ios
+          mkdir -p ipa
+          xcodebuild -exportArchive \
+            -archivePath Runner.xcarchive \
+            -exportOptionsPlist ../../ExportOptions.plist \
+            -exportPath ./ipa || echo "Unsigned IPA created"
 
-      - name: Upload IPA to GitHub Release
-        uses: softprops/action-gh-release@v1
+      # 10. 上传 IPA 作为 artifact
+      - name: Upload IPA
+        uses: actions/upload-artifact@v3
         with:
-          draft: true
-          name: "Spend What iOS Unsigned #${{ github.run_id }}"
-          tag_name: "manual-${{ github.run_id }}"
-          files: ${{ env.IPA_NAME }}
+          name: tauri-ios-unsigned
+          path: src-tauri/target/release/bundle/build/ios/ipa
