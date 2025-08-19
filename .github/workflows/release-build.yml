@@ -29,23 +29,14 @@ jobs:
           fi
           echo "Tag and package.json version are consistent."
 
-  create-release:
+  create-release-for-ios:
     needs: check_tag_version
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-          - os: windows-latest
-            target: aarch64-pc-windows-msvc
           - os: macos-latest
             target: aarch64-apple-darwin
-          - os: macos-latest
-            target: x86_64-apple-darwin
-          - os: ubuntu-22.04
-            target: x86_64-unknown-linux-gnu
-
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -54,20 +45,11 @@ jobs:
       - name: Install Rust Stable
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Add Rust Target
-        run: rustup target add ${{ matrix.target }}
-
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
-          save-if: false
-
-      - name: Install dependencies (ubuntu only)
-        if: matrix.os == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libxslt1.1 libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+          save-if: false 
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -84,101 +66,13 @@ jobs:
         run: |
           pnpm i
 
-      - name: Tauri build
-        uses: tauri-apps/tauri-action@v0
-        env:
-          NODE_OPTIONS: "--max_old_space_size=4096"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: v__VERSION__
-          releaseName: "Spend What v__VERSION__"
-          releaseDraft: true
-          args: --target ${{ matrix.target }}
+      - name: Init Tauri
+        run: |
+          pnpm tauri ios init
   
-
-  create-release-for-android:
-    needs: check_tag_version
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust Stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-          save-if: false
-
-      - name: Install dependencies (ubuntu only)
+      - name: Build Tauri
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libxslt1.1 libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-          run_install: false
-
-      - name: Pnpm install and check
-        run: |
-          pnpm i
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-            java-version: '17'
-            distribution: 'temurin'
-            
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        
-      - name: Install NDK
-        run: sdkmanager "ndk;27.0.11902837"
-
-      - name: Install dependencies
-        run: pnpm install
-      
-      - name: Build app bundle
-        run: |
-          pnpm tauri android init
-          pnpm tauri android build -v
-        env:
-          NDK_HOME: /usr/local/lib/android/sdk/ndk/27.0.11902837
-
-      - name: Extract android signing key from env
-        run: |
-            echo "${{ secrets.ANDROID_RELEASE_KEYSTORE }}" > src-tauri/gen/android/release.jks.base64
-            base64 -d src-tauri/gen/android/release.jks.base64 > src-tauri/gen/android/release.decrypted.jks
-
-      - name: Sign APK
-        run: |
-            ${{ env.ANDROID_HOME }}/build-tools/34.0.0/apksigner sign --ks src-tauri/gen/android/release.decrypted.jks \
-            --ks-key-alias ${{ secrets.ANDROID_RELEASE_KEY }} \
-            --ks-pass pass:${{ secrets.ANDROID_RELEASE_PASSWORD }} \
-            --key-pass pass:${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }} \
-            --out src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-signed.apk \
-            src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-unsigned.apk
-
-      - name: Get Node project version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
-
-      - name: Rename APK file
-        run: |
-           mv ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release-signed.apk ./src-tauri/gen/android/app/build/outputs/apk/universal/release/spend-what_${{ steps.package-version.outputs.current-version}}.apk
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: app-release.apk
-          path: src-tauri/target/release/bundle/android/*.apk
+          pnpm tauri ios build
 
       - name: Publish
         uses: softprops/action-gh-release@v1
