@@ -2,6 +2,7 @@ import type { languageCodes } from "./util";
 
 export default {
   theme: "light",
+  remoteUrl: "http://localhost:3000",
   language: "chi" as keyof typeof languageCodes,
 
   // 账单设置

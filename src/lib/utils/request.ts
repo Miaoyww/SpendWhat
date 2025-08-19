@@ -1,11 +1,9 @@
 import axios from "axios";
-
-const PORT = 3000;
-const HOST_URL = "http://localhost" + (PORT ? `:${PORT}` : ""); // 全局HOST基础路径
-const API_URL = `${HOST_URL}/api`; // 全局API基础路径
+import {settings} from "$lib/modules/settings/settings";
+import { get } from "svelte/store";
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: `${get(settings).remoteUrl}/api`,
   timeout: 10000, // 可选：请求超时时间
   withCredentials: true,
   headers: {

@@ -5,11 +5,11 @@
   import { Input } from "$lib/components/ui/input";
   import { Switch } from "$lib/components/ui/switch";
   import * as ToggleGroup from "$lib/components/ui/toggle-group/index.js";
-  import { settings } from "$lib/modules/settings";
+  import { settings } from "$lib/modules/settings/settings";
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import * as Command from "$lib/components/ui/command/index.js";
   import CommandList from "$lib/components/ui/command-list/command-list.svelte";
-  import { languageCodes, convertToComboBox } from "$lib/modules/util";
+  import { languageCodes, convertToComboBox } from "$lib/modules/settings/util";
 
   let importDialog = $state(false);
   let emojiDialog = $state(false);
@@ -89,6 +89,14 @@
     description="若启动离线模式, 所有账单信息均不会上传至服务器, 您需要自行保管数据."
   >
     <Switch {id} bind:checked={$settings.offlineMode} />
+  </SettingCard>
+
+  <SettingCard
+    let:id
+    title="远程服务器地址"
+    description="如果您自搭建服务器, 可在这里改为您的地址. 修改后请手动重启软件."
+  >
+    <Input {id} class="w-2/5" bind:value={$settings.remoteUrl} />
   </SettingCard>
   <SettingCard
     let:id

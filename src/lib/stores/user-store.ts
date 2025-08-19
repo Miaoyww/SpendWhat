@@ -1,11 +1,8 @@
-import axios from "axios";
 import { writable } from "svelte/store";
 import { showAlert } from "./alert-dialog-store";
 import { User } from "$lib/models/user";
 import { billStore, getCurrentUserBillsFromServer } from "./bill-store";
 import api from "$lib/utils/request";
-
-const API_URL = "http://localhost:3000/api/user/";
 
 export const currentUser = writable<User | null>(null);
 export let currentSession = "";
@@ -55,8 +52,8 @@ export function loginUser(
     password: password,
   };
 
-  return axios
-    .post(API_URL + "login", data)
+  return api
+    .post("/user/login", data)
     .then(async (response) => {
       let session = response.data.cookie.session;
       // 将session存储到cookie
@@ -89,8 +86,8 @@ export function registerUser(
     password: password,
   };
 
-  return axios
-    .post(API_URL + "register", data)
+  return api
+    .post("/user/register", data)
     .then((response) => {
       return true;
     })
