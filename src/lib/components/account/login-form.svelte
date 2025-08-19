@@ -7,7 +7,15 @@
   import { showAlert } from "$lib/stores/alert-dialog-store";
   import { NavigateTo } from "$lib/utils/navigating";
   import { sha256 } from "js-sha256";
+  import * as Dialog from "$lib/components/ui/dialog/index.js";
+  import { getContext } from "svelte";
 
+  let dialogOpens: {
+    isLoginDialogOpen: boolean;
+    isRegisterDialogOpen: boolean;
+  } = getContext("dialogOpens");
+
+  let { open = $bindable() } = $props();
   let userName = $state("");
   let password = $state("");
 
@@ -29,17 +37,17 @@
     );
 
     if (isLoggedIn) {
-      NavigateTo("/app/settings/account");
+      open = false;
     }
   }
 </script>
 
-<Card.Root class="mx-auto w-full max-w-sm">
-  <Card.Header>
-    <Card.Title class="text-2xl">欢迎回来</Card.Title>
-    <Card.Description>请输入您的用户名以登录您的帐户</Card.Description>
-  </Card.Header>
-  <Card.Content>
+<Dialog.Root bind:open>
+  <Dialog.Content class="mx-auto w-full max-w-sm">
+    <Dialog.Header>
+      <Dialog.Title class="text-2xl">欢迎回来</Dialog.Title>
+      <Dialog.Description>请输入您的用户名以登录您的帐户</Dialog.Description>
+    </Dialog.Header>
     <div class="grid gap-4">
       <div class="grid gap-2">
         <Label for="email-{id}">用户名</Label>
@@ -69,7 +77,18 @@
     </div>
     <div class="mt-4 text-center text-sm">
       还没有帐户?
-      <a href="/app/user/register" class="underline"> 立即注册 </a>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <!-- svelte-ignore a11y_missing_attribute -->
+      <a
+        onclick={() => {
+          dialogOpens.isRegisterDialogOpen = true;
+          dialogOpens.isLoginDialogOpen = false;
+        }}
+        class="underline"
+      >
+        立即注册
+      </a>
     </div>
-  </Card.Content>
-</Card.Root>
+  </Dialog.Content>
+</Dialog.Root>

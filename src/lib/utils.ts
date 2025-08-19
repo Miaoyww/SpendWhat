@@ -1,5 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { User } from "./models/user";
+import { loginByCookie } from "./stores/user-store";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -11,3 +13,13 @@ export type WithoutChild<T> = T extends { child?: any } ? Omit<T, "child"> : T;
 export type WithoutChildren<T> = T extends { children?: any } ? Omit<T, "children"> : T;
 export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
 export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?: U | null };
+
+export async function initApp() {
+  // 从 document.cookie 拿 session
+  const match = document.cookie.match(/(?:^|; )session=([^;]*)/);
+  const session = match ? decodeURIComponent(match[1]) : null;
+
+  if (session) {
+    await loginByCookie(session); // 自动恢复 currentUser
+  }
+}

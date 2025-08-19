@@ -10,12 +10,14 @@
   import { isBillPageNow } from "$lib/utils/navigating";
   import { onNavigate } from "$app/navigation";
   import { Toaster } from "$lib/components/ui/sonner/index.js";
-
+  import {initApp} from "$lib/utils"
   const { children } = $props<{
     children: any;
   }>();
 
   onMount(async () => {
+
+    await initApp();
     //防止一开始就是bill页面
     isBillPageNow();
   });

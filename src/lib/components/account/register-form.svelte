@@ -7,9 +7,18 @@
   import { loginUser, registerUser } from "$lib/stores/user-store";
   import { NavigateTo } from "$lib/utils/navigating";
   import { sha256 } from "js-sha256";
+  import * as Dialog from "$lib/components/ui/dialog/index.js";
+  import { getContext } from "svelte";
+
+  let dialogOpens: {
+    isLoginDialogOpen: boolean;
+    isRegisterDialogOpen: boolean;
+  } = getContext("dialogOpens");
 
   let userName = $state("");
   let password = $state("");
+  let { open = $bindable() } = $props();
+
   const id = $props.id();
 
   async function register() {
@@ -29,19 +38,22 @@
     );
 
     if (isRegistered) {
-      await loginUser($state.snapshot(userName), $state.snapshot(sha256(password)));
+      await loginUser(
+        $state.snapshot(userName),
+        $state.snapshot(sha256(password))
+      );
       // 注册成功，跳转到用户主页
-      NavigateTo("/app/settings/account");
+      open = false;
     }
   }
 </script>
 
-<Card.Root class="mx-auto w-full max-w-sm">
-  <Card.Header>
-    <Card.Title class="text-2xl">注册</Card.Title>
-    <Card.Description>请输入您的用户名和密码以注册</Card.Description>
-  </Card.Header>
-  <Card.Content>
+<Dialog.Root bind:open>
+  <Dialog.Content class="mx-auto w-full max-w-sm">
+    <Dialog.Header>
+      <Dialog.Title class="text-2xl">注册</Dialog.Title>
+      <Dialog.Description>请输入您的用户名和密码以注册</Dialog.Description>
+    </Dialog.Header>
     <div class="grid gap-4">
       <div class="grid gap-2">
         <Label for="userName-{id}">用户名</Label>
@@ -68,7 +80,19 @@
     </div>
     <div class="mt-4 text-center text-sm">
       已经有帐户?
-      <a href="/app/user/login" class="underline"> 立即登录 </a>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <!-- svelte-ignore a11y_missing_attribute -->
+
+      <a
+        onclick={() => {
+          dialogOpens.isLoginDialogOpen = true;
+          dialogOpens.isRegisterDialogOpen = false;
+        }}
+        class="underline"
+      >
+        立即登录
+      </a>
     </div>
-  </Card.Content>
-</Card.Root>
+  </Dialog.Content>
+</Dialog.Root>
