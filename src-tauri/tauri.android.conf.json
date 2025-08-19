@@ -1,0 +1,12 @@
+{
+  "app": {
+    "android": {
+      "fullscreen": false,
+      "statusBar": {
+        "visible": true,
+        "transparent": false,
+        "color": "#ffffff"
+      }
+    }
+  }
+}
