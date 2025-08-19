@@ -4,7 +4,7 @@
   import { currentBill } from "$lib/stores/bill-store";
   import BillMemberCard from "$lib/components/bills/bill-member.card.svelte";
   import { showAlert } from "$lib/stores/alert-dialog-store";
-  import api from "$lib/utils/request";
+  import  Post  from "$lib/utils/request";
   import { BillMember } from "$lib/models/bill-member";
   import { toast } from "svelte-sonner";
   import { NavigateTo } from "$lib/utils/navigating";
@@ -15,7 +15,7 @@
   
   let newName = $state("");
 
-  function addMember() {
+  async function addMember() {
     if (!$currentBill) {
       showAlert("错误", "$currentBill为空");
       return;
@@ -32,10 +32,10 @@
       bill_id: $currentBill.id,
       name: newName,
     };
-    api
-      .post("/bill/member/add", data)
-      .then((res) => {
-        let newMember = new BillMember(res.data.name, res.data._id);
+    await Post("/bill/member/add", data)
+      .then(async (res) => {
+        let responseData = await res.json();
+        let newMember = new BillMember(responseData.name, responseData._id);
         $currentBill.members.push(newMember);
         toast.success("成员添加成功", {
           description: `已成功添加成员：${newMember.name}`,

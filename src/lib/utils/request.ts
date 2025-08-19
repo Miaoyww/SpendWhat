@@ -1,15 +1,14 @@
 import axios from "axios";
-import {settings} from "$lib/modules/settings/settings";
+import { settings } from "$lib/modules/settings/settings";
 import { get } from "svelte/store";
+import { fetch } from "@tauri-apps/plugin-http";
 
-const api = axios.create({
-  baseURL: `${get(settings).remoteUrl}/api`,
-  timeout: 10000, // 可选：请求超时时间
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-    // 其他默认请求头
-  },
-});
-
-export default api;
+export default async function Post(url: string, data?: any) {
+  return fetch(`${get(settings).remoteUrl}/api${url}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: data ? JSON.stringify(data) : undefined,
+  })
+}

@@ -1,6 +1,6 @@
 import { BillItem } from "$lib/models/bill-item";
 import { User } from "$lib/models/user";
-import api from "$lib/utils/request";
+import Post from "$lib/utils/request";
 import { showAlert } from "$lib/stores/alert-dialog-store";
 import axios from "axios";
 import { BillMember } from "$lib/models/bill-member";
@@ -60,8 +60,9 @@ export class Bill {
         occurred_at: this.occurred_at.toISOString(),
         currency: this.currency,
       };
-      const response = await api.post("/bill/create", data);
-      this.id = response.data.id;
+      const response = await Post("/bill/create", data);
+      let responseData = await response.json();
+      this.id = responseData.id;
     } catch (error) {
       showAlert("错误", "账单创建失败.");
       console.error("账单创建失败:", error);
@@ -98,8 +99,9 @@ export class Bill {
         skip: 0,
         limit: 30,
       };
-      const response = await api.post(`/bill/item/list`, data);
-      response.data.forEach((item: any) => {
+      const response = await Post(`/bill/item/list`, data);
+      let responseData = await response.json();
+      responseData.forEach((item: any) => {
         console.log("获取账单项:", item);
         //如果id有重则不新建
         let member = new BillMember(item.paid_by.name, this, item.paid_by.id);
@@ -124,7 +126,7 @@ export class Bill {
         }
       });
 
-      const roleResponse = await api.post("/bill/access/list", {
+      const roleResponse = await Post("/bill/access/list", {
         bill_id: this.id,
       });
 
@@ -133,8 +135,9 @@ export class Bill {
         role: "owner" | "member" | "observer";
       }
 
+      let roleResponseData = await roleResponse.json();
       // 假设 roleResponse.data 是 any[]，先用 map 转成类型安全的 UserRole[]
-      const userRoles: UserRole[] = roleResponse.data.map((u: any) => ({
+      const userRoles: UserRole[] = roleResponseData.map((u: any) => ({
         user_id: u.user_id,
         role: u.role,
       }));

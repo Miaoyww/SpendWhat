@@ -2,7 +2,7 @@ import { writable } from "svelte/store";
 import { showAlert } from "./alert-dialog-store";
 import { User } from "$lib/models/user";
 import { billStore, getCurrentUserBillsFromServer } from "./bill-store";
-import api from "$lib/utils/request";
+import  Post  from "$lib/utils/request";
 
 export const currentUser = writable<User | null>(null);
 export let currentSession = "";
@@ -14,10 +14,10 @@ currentUser.subscribe((value) => {
 });
 
 export async function getCurrentUser(): Promise<User | null> {
-  return api
-    .post("/user/self/get")
+  return Post("/user/self/get")
     .then(async (response) => {
-      user = new User(response.data.id, response.data.username);
+      let data = await response.json();
+      user = new User(data.id, data.username);
       currentUser.set(user);
 
       if (user && user.id) {
@@ -43,7 +43,7 @@ export function loginByCookie(session: string): Promise<User | null> {
   return getCurrentUser();
 }
 
-export function loginUser(
+export async function loginUser(
   userName: string,
   password: string
 ): Promise<boolean> {
@@ -51,30 +51,24 @@ export function loginUser(
     username: userName,
     password: password,
   };
+  let res = await Post("/user/login", data);
+  if (res.status === 200) {
+    let session = res.headers
+      .get("set-cookie")
+      ?.split(";")
+      .find((c) => c.trim().startsWith("session="))
+      ?.split("=")[1];
+    document.cookie = `session=${session}; path=/`;
 
-  return api
-    .post("/user/login", data)
-    .then(async (response) => {
-      let session = response.data.cookie.session;
-      // 将session存储到cookie
-      document.cookie = `session=${session}; path=/`;
-      // 更新当前用户信息
-
-      let user = await getCurrentUser();
-      if (!user) {
-        showAlert("错误", "获取用户信息失败，请稍后再试");
-        return false;
-      }
-      currentUser.set(user);
-      return true;
-    })
-    .catch((error) => {
-      if (error.response && error.response.status === 400) {
-        showAlert("错误", "用户名或密码错误");
-      }
-      console.error("登录时出错:", error);
+    let user = await getCurrentUser();
+    if (!user) {
+      showAlert("错误", "获取用户信息失败，请稍后再试");
       return false;
-    });
+    }
+    currentUser.set(user);
+    return true;
+  }
+  return true;
 }
 
 export function registerUser(
@@ -86,8 +80,7 @@ export function registerUser(
     password: password,
   };
 
-  return api
-    .post("/user/register", data)
+  return Post("/user/register", data)
     .then((response) => {
       return true;
     })
