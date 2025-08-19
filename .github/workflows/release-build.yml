@@ -85,4 +85,9 @@ jobs:
           echo "IPA_NAME=$IPA_NAME" >> $GITHUB_ENV
 
       - name: Upload IPA to GitHub Release
-        uses: softprops/action-gh-release@
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          name: "Spend What iOS Unsigned #${{ github.run_id }}"
+          tag_name: "manual-${{ github.run_id }}"
+          files: ${{ env.IPA_NAME }}
