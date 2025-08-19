@@ -69,15 +69,22 @@ jobs:
         run: |
           pnpm tauri ios init
   
-      - name: Build Tauri (iOS Simulator, skip signing)
+      - name: Build Tauri (Unsigned iOS .ipa)
         run: |
-          # 禁用签名，强制构建模拟器版本
           export RUST_LOG=info
           pnpm tauri ios build -- \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            -sdk iphonesimulator
+            -sdk iphoneos
+            
+      - name: Package IPA
+        run: |
+          APP_PATH=$(find src-tauri/gen/apple/ -name "*.app" -type d | head -n 1)
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -r app-unsigned.ipa Payload
+          rm -rf Payload
 
       - name: Publish
         uses: softprops/action-gh-release@v1
