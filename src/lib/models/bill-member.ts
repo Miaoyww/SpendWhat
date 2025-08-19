@@ -1,7 +1,7 @@
 import type { User } from "$lib/models/user";
 import { BillRole } from "$lib/enum/roles";
 import type { Bill } from "./bill";
-import api from "$lib/utils/request";
+import  Post  from "$lib/utils/request";
 import { showAlert } from "$lib/stores/alert-dialog-store";
 
 export class BillMember {
@@ -32,16 +32,16 @@ export class BillMember {
       name: this.name,
     };
 
-    await api
-      .post("/bill/member/add", data)
-      .then((res) => {
-        this.id = res.data._id;
+    await Post("/bill/member/add", data)
+      .then(async (res) => {
+        let responseData = await res.json();
+        this.id = responseData._id;
       })
       .catch((error) => {
         showAlert("错误", error.message || "网络错误");
       });
   }
-  async bindUserToServer(){
+  async bindUserToServer() {
     if (!this.user) {
       showAlert("错误", "用户未绑定.");
       return;
@@ -53,11 +53,9 @@ export class BillMember {
       user_id: this.user.id,
     };
 
-    await api
-      .post("/bill/member/bind", data)
-      .catch((error) => {
-        showAlert("错误", error.message || "网络错误");
-      });
+    await Post("/bill/member/bind", data).catch((error) => {
+      showAlert("错误", error.message || "网络错误");
+    });
   }
   // 是否已绑定
   get isBound(): boolean {

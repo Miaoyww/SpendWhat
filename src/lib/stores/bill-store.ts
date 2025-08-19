@@ -7,7 +7,7 @@ import {
 } from "$lib/models/bill";
 import { BillItem } from "$lib/models/bill-item";
 import { currentUser } from "$lib/stores/user-store";
-import api from "$lib/utils/request";
+import Post from "$lib/utils/request";
 import type { User } from "$lib/models/user";
 import { showAlert } from "./alert-dialog-store";
 import { NavigateTo } from "$lib/utils/navigating";
@@ -54,11 +54,11 @@ function addBillList(newBill: Bill[]) {
 }
 
 // 删除账单
-function removeBill(id: string) {
+async function removeBill(id: string) {
   let data = {
     id_list: [id],
   };
-  api.post("/bill/multi/delete", data).then((response) => {
+  await Post("/bill/multi/delete", data).then((response) => {
     if (response.status !== 200) {
       showAlert("错误", `账单未能正确删除. ${response.status}`);
     }
@@ -156,13 +156,14 @@ export const billStore = {
   refreshBill,
 };
 
-export function getCurrentUserBillsFromServer(): Bill[] {
+export async function getCurrentUserBillsFromServer(): Promise<Bill[]> {
   let data = {
     skip: 0,
     limit: 30,
   };
-  api.post("/bill/list", data).then((response) => {
-    let billsRaw = response.data as BillResponseItem[];
+  await Post("/bill/list", data).then(async (response) => {
+    let data = await response.json();
+    let billsRaw = data as BillResponseItem[];
     let user: User | null = null;
     currentUser.subscribe((value) => {
       user = value;
@@ -185,7 +186,7 @@ export function updateBillToServer(bill: Bill) {
     id: bill.id,
     title: bill.title,
   };
-  api.post(`/bill/update`, data).then((response) => {
+  Post(`/bill/update`, data).then((response) => {
     if (response.status !== 200) {
       showAlert("错误", `账单未能正确更新. ${response.status}`);
     }

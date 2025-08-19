@@ -1,6 +1,6 @@
 import type { User } from "$lib/models/user";
 import { showAlert } from "$lib/stores/alert-dialog-store";
-import api from "$lib/utils/request";
+import Post from "$lib/utils/request";
 import { Bill } from "./bill";
 import type { BillMember } from "./bill-member";
 
@@ -53,8 +53,9 @@ export class BillItem {
         paid_by: this.paid_by.id,
       };
 
-      const response = await api.post("/bill/item/create", data);
-      this.id = response.data.bill_item_id;
+      const response = await Post("/bill/item/create", data);
+      let responseData = await response.json();
+      this.id = responseData.bill_item_id;
     } catch (error) {
       showAlert("错误", `账单创建失败. ${error}`);
       console.error("账单创建失败:", error);
@@ -74,7 +75,7 @@ export class BillItem {
       paid_by: this.paid_by.id,
     };
     console.log("更新账单项数据:", data);
-    await api.post("/bill/item/update", data).catch((error) => {
+    await Post("/bill/item/update", data).catch((error) => {
       showAlert("错误", "账单项更新失败.");
       console.error("账单项更新失败:", error);
     });
@@ -88,7 +89,7 @@ export class BillItem {
       item_id: this.id,
     };
 
-    await api.post("/bill/item/delete", data).then((response) => {
+    await Post("/bill/item/delete", data).then((response) => {
       if (response.status !== 200) {
         showAlert("错误", `账单项未能正确删除. ${response.status}`);
         return false;
