@@ -3,23 +3,12 @@ name: Build iOS Unsigned IPA
 on:
   workflow_dispatch:
 
-permissions: write-all
-
 jobs:
   ios-unsigned-ipa:
     runs-on: macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-          save-if: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -35,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: pnpm i
 
-      - name: Build Frontend Static Assets
+      - name: Build frontend
         run: pnpm build
 
       - name: Setup Xcode
@@ -43,24 +32,23 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Init Tauri iOS
-        run: pnpm tauri ios init || echo "iOS platform already initialized"
+      - name: Init Tauri iOS (if needed)
+        run: pnpm tauri ios init || echo "iOS already initialized"
 
       - name: Copy frontend build into Xcode project
         run: |
           RES_DIR="src-tauri/gen/apple/App/Resources"
           mkdir -p "$RES_DIR"
-          rm -rf "$RES_DIR/*"
           cp -r build/* "$RES_DIR/"
 
       - name: Patch Xcode project to disable signing
         run: |
           PBXPROJ="src-tauri/gen/apple/app.xcodeproj/project.pbxproj"
-          sed 's/DEVELOPMENT_TEAM = .*/DEVELOPMENT_TEAM = "";/g' "$PBXPROJ" > "$PBXPROJ.tmp" && mv "$PBXPROJ.tmp" "$PBXPROJ"
-          sed 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PBXPROJ" > "$PBXPROJ.tmp" && mv "$PBXPROJ.tmp" "$PBXPROJ"
-          sed 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$PBXPROJ" > "$PBXPROJ.tmp" && mv "$PBXPROJ.tmp" "$PBXPROJ"
+          sed -i '' 's/DEVELOPMENT_TEAM = .*/DEVELOPMENT_TEAM = "";/g' "$PBXPROJ"
+          sed -i '' 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PBXPROJ"
+          sed -i '' 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$PBXPROJ"
 
-      - name: Build iOS Debug IPA (Unsigned)
+      - name: Build Debug IPA (Unsigned)
         run: |
           xcodebuild \
             -workspace src-tauri/gen/apple/app.xcodeproj/project.xcworkspace \
@@ -75,10 +63,6 @@ jobs:
       - name: Package IPA
         run: |
           APP_PATH=$(find build/ios/Debug-iphoneos -name "*.app" -type d | head -n 1)
-          if [ -z "$APP_PATH" ]; then
-            echo "Error: .app not found!"
-            exit 1
-          fi
           mkdir -p Payload
           cp -r "$APP_PATH" Payload/
           IPA_NAME="spend-what-ios-unsigned-${GITHUB_RUN_ID}.ipa"
