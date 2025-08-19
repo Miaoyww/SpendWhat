@@ -11,15 +11,11 @@
   import { onNavigate } from "$app/navigation";
   import { Toaster } from "$lib/components/ui/sonner/index.js";
 
-  const { data, children } = $props<{
-    data: { session: string };
+  const { children } = $props<{
     children: any;
   }>();
 
   onMount(async () => {
-    //启动时尝试登录
-    await loginByCookie(data.session);
-
     //防止一开始就是bill页面
     isBillPageNow();
   });

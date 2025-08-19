@@ -140,7 +140,7 @@
         <div style="float: left;">
           <Sidebar.MenuButton>
             <div style="display: flex; align-items: center;">
-              <a href="/app/user" class="flex items-center">
+              <a href="/app/settings/account" class="flex items-center">
                 {#if $currentUser}
                   <span class="ml-1">{$currentUser.username}</span>
                 {:else}
