@@ -76,11 +76,7 @@ jobs:
             -allowProvisioningUpdates \
             -allowProvisioningDeviceRegistration \
             -destination generic/platform=iOS \
-            CODE_SIGN_STYLE="Automatic" \
-            DEVELOPMENT_TEAM="" \
-            CODE_SIGN_IDENTITY="Apple Development" \
-            CODE_SIGNING_REQUIRED=YES \
-            CODE_SIGNING_ALLOWED=YES
+            CODE_SIGN_STYLE="Automatic"
             
       - name: Package IPA
         run: |
