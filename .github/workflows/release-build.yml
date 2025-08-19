@@ -44,7 +44,7 @@ jobs:
         run: |
           pnpm tauri ios init || echo "iOS platform already initialized"
 
-      - name: Build Tauri iOS without signing
+      - name: Build Tauri iOS without signing (Debug)
         run: |
           export RUST_LOG=info
           pnpm tauri ios build --verbose -- \
@@ -53,22 +53,28 @@ jobs:
             CODE_SIGNING_REQUIRED="NO" \
             DEVELOPMENT_TEAM="" \
             PROVISIONING_PROFILE_SPECIFIER="" \
-            --configuration Debug
+            -- -configuration Debug
 
       - name: Package IPA (Unsigned)
         run: |
           APP_PATH=$(find src-tauri/gen/apple/ -name "*.app" -type d | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: .app not found!"
+            exit 1
+          fi
           echo "App found at $APP_PATH"
           mkdir -p Payload
           cp -r "$APP_PATH" Payload/
-          zip -r spend-what-${GITHUB_REF##*/}-ios-unsigned.ipa Payload
+          IPA_NAME="spend-what-ios-unsigned-${GITHUB_RUN_ID}.ipa"
+          zip -r "$IPA_NAME" Payload
           rm -rf Payload
+          echo "IPA generated: $IPA_NAME"
+          echo "IPA_NAME=$IPA_NAME" >> $GITHUB_ENV
 
       - name: Upload IPA to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
-          name: Spend What ${GITHUB_REF##*/} iOS Unsigned
-          tag_name: ${{ github.ref_name }}
-          files: |
-            spend-what-${GITHUB_REF##*/}-ios-unsigned.ipa
+          name: "Spend What iOS Unsigned #${{ github.run_id }}"
+          tag_name: "manual-${{ github.run_id }}"
+          files: ${{ env.IPA_NAME }}
