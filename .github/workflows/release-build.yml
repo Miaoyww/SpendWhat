@@ -1,34 +1,12 @@
 name: Release Build
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  workflow_dispatch:
 
 permissions: write-all
 
 jobs:
-  check_tag_version:
-    name: Check Release Tag and package.json Version Consistency
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Check tag and package.json version
-        run: |
-          TAG_REF="${GITHUB_REF##*/}"
-          echo "Current tag: $TAG_REF"
-          PKG_VERSION=$(jq -r .version package.json)
-          echo "package.json version: $PKG_VERSION"
-          if [[ "$TAG_REF" != "v$PKG_VERSION" ]]; then
-            echo "Tag ($TAG_REF) does not match package.json version (v$PKG_VERSION)."
-            exit 1
-          fi
-          echo "Tag and package.json version are consistent."
-
   create-release-for-ios:
-    needs: check_tag_version
     runs-on: macos-latest
     steps:
       - name: Checkout
