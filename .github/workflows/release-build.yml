@@ -48,8 +48,10 @@ jobs:
 
       - name: Copy frontend build into Xcode project
         run: |
-          rm -rf src-tauri/gen/apple/App/Resources/*
-          cp -r build/* src-tauri/gen/apple/App/Resources/
+          RES_DIR="src-tauri/gen/apple/App/Resources"
+          mkdir -p "$RES_DIR"
+          rm -rf "$RES_DIR/*"
+          cp -r build/* "$RES_DIR/"
 
       - name: Patch Xcode project to disable signing
         run: |
