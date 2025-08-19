@@ -1,10 +1,11 @@
-import { loginByCookie } from "$lib/stores/user-store";
 import type { LayoutServerLoad } from "./$types";
+import { browser } from '$app/environment';
 
 export const load: LayoutServerLoad = async ({ cookies }) => {
   const session = cookies.get('session') ?? '';
-  localStorage.setItem("session", session);
-  
+  if (browser) {
+    localStorage.setItem("session", session);
+  }
   return {
     session
   };

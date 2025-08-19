@@ -154,7 +154,7 @@
   <Dialog.Root bind:open={emojiDialog}>
     <Dialog.Content class="w-68">
       <Dialog.Title>设置表情</Dialog.Title>
-      <CommandList bind:items={$settings.billEmojis} />
+      <!-- <CommandList bind:items={$settings.billEmojis} /> -->
     </Dialog.Content>
   </Dialog.Root>
 {/key}
